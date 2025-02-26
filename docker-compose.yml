@@ -5,6 +5,7 @@ volumes:
   static:
   menu-db_data:
   menu-redis_data:
+  portainer_data:
 
 networks:
   menu-net:
@@ -73,3 +74,15 @@ services:
       - menu-db
     networks:
       - menu-net
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    environment:
+      - TZ=Asia/Almaty
+    ports:
+      - "9000:9000"
+    volumes:
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
