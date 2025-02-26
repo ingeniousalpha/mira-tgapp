@@ -1,0 +1,6 @@
+ACCESS_DENIED = "access_denied"
+INTERNAL_SERVER_ERROR = "internal_server_error"
+INVALID_INPUT_DATA = "invalid_input_data"
+NOT_FOUND = "not_found"
+TOO_MANY_REQUEST = "too_many_request"
+USER_NOT_AUTHORIZED = "user_not_authorized"
