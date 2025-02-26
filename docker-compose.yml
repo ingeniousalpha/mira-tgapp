@@ -1,0 +1,75 @@
+version: '3.9'
+
+volumes:
+  media:
+  static:
+  menu-db_data:
+  menu-redis_data:
+
+networks:
+  menu-net:
+    driver: bridge
+
+services:
+  menu-server:
+    container_name: menu-server
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/menubot
+      - media:/media
+    env_file:
+      - ./.env.dev
+    ports:
+      - "8000:8000"
+    networks:
+      - menu-net
+
+  menu-redis:
+    container_name: menu-redis
+    restart: unless-stopped
+    image: redis
+    command: redis-server --appendonly yes --replica-read-only no
+    ports:
+      - "6379:6379"
+    volumes:
+      - menu-redis_data:/data
+    env_file:
+      - ./.env.dev
+    networks:
+      - menu-net
+
+  menu-db:
+    container_name: menu-db
+    restart: always
+    image: postgres
+    volumes:
+      - menu-db_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.dev
+    environment:
+      - POSTGRES_DB=menudb
+      - POSTGRES_USER=menudb
+      - POSTGRES_PASSWORD=menudb
+    ports:
+      - "5432:5432"
+    networks:
+      - menu-net
+
+  menu-bot:
+    container_name: menu-bot
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python bot/launcher.py
+    volumes:
+      - .:/menubot
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - menu-db
+    networks:
+      - menu-net
