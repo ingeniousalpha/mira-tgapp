@@ -301,3 +301,4 @@ CORS_ALLOW_HEADERS = [
     'cookie'
 ]
 
+CSRF_TRUSTED_ORIGINS = ['https://miraapa.uz', 'https://www.miraapa.uz']
