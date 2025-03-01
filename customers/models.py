@@ -2,6 +2,7 @@ import json
 
 from django.db import models
 from django.db.models import TextChoices
+from localized_fields.fields import LocalizedTextField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from menu.models import MenuItem
@@ -13,7 +14,8 @@ class CustomerLanguages(TextChoices):
 
 
 class Customer(models.Model):
-    telegram_user_id = models.BigIntegerField(unique=True, verbose_name='Telegram ID')
+    telegram_user_id = models.BigIntegerField(unique=True, verbose_name='Telegram user ID')
+    chat_id = models.BigIntegerField(verbose_name='Chat ID')
     phone_number = PhoneNumberField(null=True, blank=True, verbose_name='Номер телефона')
     language = models.CharField(
         max_length=5,
@@ -129,6 +131,7 @@ class Order(models.Model):
         default=OrderStatuses.ACCEPTED,
         verbose_name='Статус'
     )
+    address = models.TextField(verbose_name='Адрес')
     cart_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Стоимость всех позиций')
     delivery_fee = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Стоимость доставки')
     service_fee = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Сервисный сбор')
@@ -156,3 +159,11 @@ class OrderItem(models.Model):
         verbose_name_plural = 'Позиции заказа'
         ordering = ('-created_at', '-id')
         unique_together = ('order', 'menu_item')
+
+
+class Notification(models.Model):
+    text = LocalizedTextField(required=True, verbose_name="Текст")
+
+    class Meta:
+        verbose_name = 'Уведомление'
+        verbose_name_plural = 'Уведомления'

@@ -48,7 +48,6 @@ class HandlerCode400(AbstractHandler):
     _default_error_code = error_codes.INVALID_INPUT_DATA
 
     def format_logic(self):
-        print(self.raw_data)
         return None, CustomError(*self.get_error_detail()).__dict__
 
 

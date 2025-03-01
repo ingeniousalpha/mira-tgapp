@@ -79,9 +79,14 @@ class KeyboardType(enum.Enum):
     SETTINGS = 6
 
 
-def build_keyboard(session, telegram_user_id, keyboard_type,  language=None):
+def build_keyboard(session, telegram_user_id, keyboard_type,  language):
     if language:
         language = language.upper()
+    customer = session.execute(sql.text(f"""
+        SELECT id
+        FROM customers_customer
+        WHERE telegram_user_id = {telegram_user_id}
+    """)).fetchone()
     request_contact = False
     if keyboard_type == KeyboardType.ADDRESSES:
         keyboard = [
@@ -118,12 +123,14 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language=None):
         ]
         request_contact = True
     elif keyboard_type == KeyboardType.MENU:
+        params= f"?customer_id={customer[0]}&language={language.lower()}"
+        full_url = str(get_constance_value(session, f'WEB_APP_URL')) + params
         return types.InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     types.InlineKeyboardButton(
                         text=get_constance_value(session, f'WEB_APP_BUTTON_{language}'),
-                        web_app=types.WebAppInfo(url=get_constance_value(session, f'WEB_APP_URL'))
+                        web_app=types.WebAppInfo(url=full_url)
                     )
                 ]
             ]
@@ -164,8 +171,8 @@ async def command_start(message: types.Message, state: FSMContext):
         if not customer:
             created = True
             session.execute(sql.text(f"""
-                INSERT INTO customers_customer (telegram_user_id, phone_number, language, created_at)
-                VALUES ({message.from_user.id}, NULL, NULL, NOW()) ON CONFLICT (telegram_user_id) DO NOTHING
+                INSERT INTO customers_customer (telegram_user_id, chat_id, phone_number, language, created_at)
+                VALUES ({message.from_user.id}, {message.chat.id}, NULL, NULL, NOW()) ON CONFLICT (telegram_user_id) DO NOTHING
             """))
             session.commit()
         if created or not customer[0]:
@@ -289,6 +296,11 @@ def check_point(vertices, point):
 async def process_address_section(message: types.Message, state: FSMContext):
     with (Session(engine) as session):
         language = get_customer_language(session, message.from_user.id)
+        customer = session.execute(sql.text(f"""
+            SELECT id
+            FROM customers_customer
+            WHERE telegram_user_id = {message.from_user.id}
+        """)).fetchone()
         if message.location:
             latitude = Decimal(message.location.latitude).quantize(Decimal('0.00000001'))
             longitude = Decimal(message.location.longitude).quantize(Decimal('0.00000001'))
@@ -309,12 +321,6 @@ async def process_address_section(message: types.Message, state: FSMContext):
                 await message.answer(text=get_constance_value(session, f'NOT_IN_DELIVERY_ZONE_{language}'))
                 return
 
-            customer = session.execute(sql.text(f"""
-                SELECT id
-                FROM customers_customer
-                WHERE telegram_user_id = {message.from_user.id}
-            """)).fetchone()
-
             geolocator = Nominatim(user_agent="menu_bot")
             location = geolocator.reverse(f'{latitude}, {longitude}')
             location_items = location.address.split(',')
@@ -331,23 +337,25 @@ async def process_address_section(message: types.Message, state: FSMContext):
                 FROM customers_address
                 WHERE customer_id = {customer[0]} AND value = '{address_str}'
             """)).fetchone()
+            session.execute(sql.text(f"""
+                UPDATE customers_address
+                SET is_current = false
+                WHERE customer_id = {customer[0]}
+            """))
+            session.commit()
             if address:
-                session.execute(sql.text(f"""
-                    UPDATE customers_address
-                    SET is_current = false
-                    WHERE customer_id = {customer[0]}
-                """))
                 session.execute(sql.text(f"""
                     UPDATE customers_address
                     SET is_current = true
                     WHERE id = {address[0]}
                 """))
+                session.commit()
             else:
                 session.execute(sql.text(f"""
                     INSERT INTO customers_address (customer_id, latitude, longitude, value, is_current, created_at)
                     VALUES ({customer[0]}, {latitude}, {longitude}, '{address_str}', true, NOW())
                 """))
-            session.commit()
+                session.commit()
             message_text = get_constance_value(session, f'MENU_MESSAGE_{language}')
             keyboard_type = KeyboardType.MENU
             next_step = StepForm.main_section
@@ -363,18 +371,21 @@ async def process_address_section(message: types.Message, state: FSMContext):
                 WHERE cc.telegram_user_id = {message.from_user.id}
                 ORDER BY ca.created_at DESC
             """)).fetchall()
+            if addresses:
+                session.execute(sql.text(f"""
+                    UPDATE customers_address
+                    SET is_current = false
+                    WHERE customer_id = {customer[0]}
+                """))
+                session.commit()
             for address in addresses:
                 if message.text == address[1]:
-                    session.execute(sql.text(f"""
-                        UPDATE customers_address
-                        SET is_current = false
-                        WHERE customer_id = {message.from_user.id}
-                    """))
                     session.execute(sql.text(f"""
                         UPDATE customers_address
                         SET is_current = true
                         WHERE id = {address[0]}
                     """))
+                    session.commit()
                     break
             message_text = get_constance_value(session, f'MENU_MESSAGE_{language}')
             keyboard_type = KeyboardType.MENU

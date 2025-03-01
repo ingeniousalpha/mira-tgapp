@@ -15,7 +15,6 @@ class JSONRendererMixin:
     def dispatch(self, request, *args, **kwargs):
         try:
             response = super().dispatch(request, *args, **kwargs)
-            print(request)
             return response
 
         except Exception as e:

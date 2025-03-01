@@ -75,6 +75,37 @@ services:
     networks:
       - menu-net
 
+  menu-beat:
+    container_name: menu-beat
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/menubot
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - menu-worker
+      - menu-server
+    networks:
+      - menu-net
+    command: "celery -A MenuBot.celery_app beat --loglevel=INFO"
+
+  menu-worker:
+    container_name: menu-worker
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/menubot
+    env_file:
+      - ./.env.dev
+    networks:
+      - menu-net
+    command: "celery -A MenuBot.celery_app worker --loglevel=INFO"
+
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest

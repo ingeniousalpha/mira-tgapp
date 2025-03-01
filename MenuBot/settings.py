@@ -37,6 +37,7 @@ THIRD_PARTY_APPS = [
     "phonenumber_field",
     "constance",
     "constance.backends.database",
+    "django_celery_beat",
     "django.contrib.postgres",
     "localized_fields",
     'django_cleanup.apps.CleanupConfig',
@@ -106,6 +107,12 @@ REDIS_AS_CACHE_URL = "redis://{host}:{port}/{db_index}".format(
     host=REDIS_HOST,
     port=REDIS_PORT,
     db_index=REDIS_DB_FOR_CACHE,
+)
+REDIS_DB_FOR_CELERY = os.getenv("REDIS_DB_FOR_CELERY", "0")
+REDIS_AS_BROKER_URL = "redis://{host}:{port}/{db_index}".format(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    db_index=REDIS_DB_FOR_CELERY,
 )
 
 CACHES = {
@@ -182,6 +189,18 @@ MEDIA_ROOT = os.path.join(PROJECT_DIR, "..", "media")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+CELERY_BROKER_URL = REDIS_AS_BROKER_URL
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+CELERY_RESULT_EXTENDED = False
+CELERY_RESULT_EXPIRES = 3600
+CELERY_ALWAYS_EAGER = False
+CELERY_ACKS_LATE = True
+CELERY_TASK_PUBLISH_RETRY = False
+CELERY_DISABLE_RATE_LIMITS = False
+CELERY_TASK_TRACK_STARTED = True
+
+
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
     "POPULAR_CATEGORY_RU": ("Популярное", 'Популярная категория (RU)'),
@@ -220,13 +239,23 @@ CONSTANCE_CONFIG = {
     "SETTINGS_BUTTON_UZ": ('⚙️Sozlamalar', 'Кнопка "Настройки" (UZ)'),
     "SETTINGS_MESSAGE_RU": ('Выберите настройку', 'Сообщение в разделе "Настройки" (RU)'),
     "SETTINGS_MESSAGE_UZ": ('Sozlamani tanlang', 'Сообщение в разделе "Настройки" (UZ)'),
-    "WEB_APP_URL": ('https://tengrinews.kz/', 'Ссылка на web app'),
+    "WEB_APP_URL": ('https://miraapa.uz', 'Ссылка на web app'),
     "WEB_APP_BUTTON_RU": ('Интерактивное меню', 'Кнопка "Интерактивное меню" (RU)'),
     "WEB_APP_BUTTON_UZ": ('Interaktiv menyu', 'Кнопка "Интерактивное меню" (UZ)'),
     "NOT_IN_DELIVERY_ZONE_RU": ('Ваш адрес вне зоны доставки', 'Сообщение вне зоны доставки (RU)'),
     "NOT_IN_DELIVERY_ZONE_UZ": ('Sizning manzilingiz yetkazib berish hududidan tashqarida', 'Сообщение вне зоны доставки (UZ)'),
     "USE_MENU_BUTTON_RU": ('Откройте интерактивное меню', 'Используйте кнопку меню (RU)'),
     "USE_MENU_BUTTON_UZ": ('Interaktiv menyuni oching', 'Используйте кнопку меню (UZ)'),
+    "BILL_INITIAL_RU": ('Новый заказ', 'Счет начальный текст (RU)'),
+    "BILL_INITIAL_UZ": ('Yangi buyurtma', 'Счет начальный текст (UZ)'),
+    "BILL_CART_RU": ('Корзина', 'Счет корзина (RU)'),
+    "BILL_CART_UZ": ('Savat', 'Счет корзина (UZ)'),
+    "BILL_DELIVERY_RU": ('Доставка', 'Счет доставка (RU)'),
+    "BILL_DELIVERY_UZ": ('Yetkazib berish', 'Счет доставка (UZ)'),
+    "BILL_SERVICE_RU": ('Сервис', 'Счет сервис (RU)'),
+    "BILL_SERVICE_UZ": ('Xizmat', 'Счет сервис (UZ)'),
+    "BILL_TOTAL_RU": ('Итого', 'Счет итого (RU)'),
+    "BILL_TOTAL_UZ": ('Jami', 'Счет итого (UZ)'),
 }
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ("Настройки WebView",(
@@ -237,6 +266,18 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
         "DELIVERY_FEE",
         "MIN_CART_AMOUNT_FOR_FREE_DELIVERY",
         "SERVICE_FEE_PERCENTAGE",
+    )),
+    ("Счет. Текст",(
+        "BILL_INITIAL_RU",
+        "BILL_INITIAL_UZ",
+        "BILL_CART_RU",
+        "BILL_CART_UZ",
+        "BILL_DELIVERY_RU",
+        "BILL_DELIVERY_UZ",
+        "BILL_SERVICE_RU",
+        "BILL_SERVICE_UZ",
+        "BILL_TOTAL_RU",
+        "BILL_TOTAL_UZ",
     )),
     ("Настройки бота",(
         "ADDRESS_MESSAGE_RU",

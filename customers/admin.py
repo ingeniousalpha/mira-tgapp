@@ -1,6 +1,7 @@
 from django.contrib import admin
+from localized_fields.admin import LocalizedFieldsAdminMixin
 
-from customers.models import Customer, CartItem, OrderItem, Order, Address, DeliveryZone
+from customers.models import Customer, CartItem, OrderItem, Order, Address, DeliveryZone, Notification
 
 
 @admin.register(DeliveryZone)
@@ -29,8 +30,8 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'telegram_user_id', 'phone_number')
     search_fields = ('id', 'telegram_user_id', 'phone_number')
     sortable_by = ()
-    fields = ('id', 'telegram_user_id', 'phone_number', 'language', 'created_at')
-    readonly_fields = ('id', 'telegram_user_id', 'created_at')
+    fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'language', 'created_at')
+    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'created_at')
     inlines = [AddressInline, CartItemInline]
 
     def has_add_permission(self, request):
@@ -78,3 +79,8 @@ class OrderAdmin(admin.ModelAdmin):
 
     # def has_delete_permission(self, request, obj=None):
     #     return False
+
+
+@admin.register(Notification)
+class NotificationAdmin(LocalizedFieldsAdminMixin, admin.ModelAdmin):
+    fields = ('text',)
