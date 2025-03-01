@@ -125,6 +125,7 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
     elif keyboard_type == KeyboardType.MENU:
         params= f"?customer_id={customer[0]}&language={language.lower()}"
         full_url = str(get_constance_value(session, f'WEB_APP_URL')) + params
+        print(full_url)
         return types.InlineKeyboardMarkup(
             inline_keyboard=[
                 [
