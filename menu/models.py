@@ -31,12 +31,15 @@ class MenuItem(AbstractMenuModel):
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name='menu_items',
         verbose_name="Категория"
     )
     description = LocalizedTextField(required=True, verbose_name="Описание")
     image = models.ImageField(verbose_name="Картинка")
     price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена")
+    is_cart_category = models.BooleanField(default=False, verbose_name="Товар у кассы")
     is_popular = models.BooleanField(default=False, verbose_name="Популярная позиция")
 
     class Meta:

@@ -37,7 +37,7 @@ THIRD_PARTY_APPS = [
     "phonenumber_field",
     "constance",
     "constance.backends.database",
-    "django_celery_beat",
+    # "django_celery_beat",
     "django.contrib.postgres",
     "localized_fields",
     'django_cleanup.apps.CleanupConfig',
@@ -190,7 +190,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CELERY_BROKER_URL = REDIS_AS_BROKER_URL
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+# CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 
 CELERY_RESULT_EXTENDED = False
 CELERY_RESULT_EXPIRES = 3600

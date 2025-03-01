@@ -25,10 +25,10 @@ class CategoryAdmin(LocalizedFieldsAdminMixin, SortableAdminMixin, admin.ModelAd
 
 @admin.register(MenuItem)
 class MenuItemAdmin(LocalizedFieldsAdminMixin, SortableAdminMixin, admin.ModelAdmin):
-    list_display = ('id', 'name', 'category', 'is_popular', 'is_hidden', 'priority')
+    list_display = ('id', 'name', 'category', 'is_cart_category', 'is_popular', 'is_hidden', 'priority')
     list_display_links = ('id', 'name')
-    list_editable = ('is_popular', 'is_hidden')
-    list_filter = ('category', 'is_popular', 'is_hidden')
+    list_editable = ('is_cart_category', 'is_popular', 'is_hidden')
+    list_filter = ('category', 'is_cart_category', 'is_popular', 'is_hidden')
     search_fields = ('id', 'name__ru', 'name__uz', 'description__ru', 'description__uz')
     sortable_by = ()
-    fields = ('category', 'name', 'description', 'image', 'price', 'is_popular', 'is_hidden')
+    fields = ('category', 'name', 'description', 'image', 'price', 'is_cart_category', 'is_popular', 'is_hidden')

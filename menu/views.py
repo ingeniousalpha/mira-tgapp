@@ -30,3 +30,9 @@ class MenuItemView(PublicJSONRendererMixin, RetrieveAPIView):
     queryset = MenuItem.objects.filter(is_hidden=False)
     serializer_class = MenuItemSerializer
     pagination_class = None
+
+
+class CartCategoryMenuItemView(PublicJSONRendererMixin, ListAPIView):
+    queryset = MenuItem.objects.filter(is_hidden=False, is_cart_category=True)
+    serializer_class = MenuItemSerializer
+    pagination_class = None

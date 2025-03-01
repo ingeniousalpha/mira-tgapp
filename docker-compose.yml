@@ -75,22 +75,22 @@ services:
     networks:
       - menu-net
 
-  menu-beat:
-    container_name: menu-beat
-    restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/menubot
-    env_file:
-      - ./.env.dev
-    depends_on:
-      - menu-worker
-      - menu-server
-    networks:
-      - menu-net
-    command: "celery -A MenuBot.celery_app beat --loglevel=INFO"
+#  menu-beat:
+#    container_name: menu-beat
+#    restart: always
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    volumes:
+#      - .:/menubot
+#    env_file:
+#      - ./.env.dev
+#    depends_on:
+#      - menu-worker
+#      - menu-server
+#    networks:
+#      - menu-net
+#    command: "celery -A MenuBot.celery_app beat --loglevel=INFO"
 
   menu-worker:
     container_name: menu-worker
