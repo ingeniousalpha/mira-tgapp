@@ -1,7 +1,7 @@
 import os
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+from aiogram.filters import CommandStart
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 
@@ -14,7 +14,7 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
 # Обработчик команды /start
-@dp.message(Command("start"))
+@dp.message(CommandStart())
 async def send_welcome(message: types.Message):
     await message.answer("Привет! Я бот на вебхуках.")
 
