@@ -67,7 +67,7 @@ services:
       dockerfile: Dockerfile
     command: python bot/launcher.py
     ports:
-      - "8080:8080"
+      - "8081:8081"
     volumes:
       - .:/menubot
     env_file:

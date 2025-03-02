@@ -38,4 +38,4 @@ setup_application(app, dp, bot=bot)
 # Запуск приложения
 if __name__ == '__main__':
     # Указываем порт, на котором будет работать бот (HTTP)
-    web.run_app(app, host='0.0.0.0', port=8080)
+    web.run_app(app, host='0.0.0.0', port=8081)
