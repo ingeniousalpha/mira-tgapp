@@ -1,3 +1,5 @@
+import os
+
 from rest_framework import serializers
 
 from menu.models import Category, MenuItem
@@ -20,7 +22,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         return obj.description.translate()
 
     def get_image(self, obj):
-        return self.context['request'].build_absolute_uri(obj.image.url)
+        return os.getenv("BASE_URL") + obj.image.url
 
 
 class CategorySerializer(serializers.ModelSerializer):
