@@ -18,7 +18,7 @@ from sqlalchemy import create_engine, sql, Connection
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session
 
-from bot.storage import PostgreSQLStorage
+from .storage import PostgreSQLStorage
 
 TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_PATH = '/webhook'
