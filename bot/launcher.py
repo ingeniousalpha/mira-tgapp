@@ -10,15 +10,45 @@ from aiogram import Dispatcher, Bot, types
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.storage.base import BaseStorage, StorageKey
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 from geopy import Nominatim
 from matplotlib.path import Path
+from sqlalchemy import Column, BigInteger, String
 from sqlalchemy import create_engine, sql, Connection
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
-from .storage import PostgreSQLStorage
+Base = declarative_base()
+
+
+class UserState(Base):
+    __tablename__ = 'customers_state'
+    user_id = Column(BigInteger)
+    state = Column(String)
+
+
+class PostgreSQLStorage(BaseStorage):
+    def __init__(self, session):
+        self.session = session
+
+    async def set_state(self, key: StorageKey, state: str = None) -> None:
+        user_id = key.user_id
+        async with self.session.begin():
+            result = await self.session.execute(select(UserState).where(UserState.user_id == user_id))
+            user_state = result.scalar_one_or_none()
+
+            if user_state:
+                user_state.state = state
+            else:
+                user_state = UserState(user_id=user_id, state=state)
+                self.session.add(user_state)
+
+            await self.session.commit()
+
 
 TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_PATH = '/webhook'
@@ -54,7 +84,6 @@ async_engine = create_async_engine(DATABASE_URL)
 async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 storage = PostgreSQLStorage(async_session)
 dp = Dispatcher(storage=storage)
-
 
 
 def get_constance_value(connection: Union[Connection, Session], key: str, default=None):
