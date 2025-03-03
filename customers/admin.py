@@ -57,18 +57,12 @@ class OrderAdmin(admin.ModelAdmin):
         'customer',
         'status',
         'created_at',
-        'cart_amount',
-        'delivery_fee',
-        'service_fee',
         'total_amount',
         'comment',
     )
     readonly_fields = (
         'customer',
         'created_at',
-        'cart_amount',
-        'delivery_fee',
-        'service_fee',
         'total_amount',
         'comment',
     )

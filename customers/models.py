@@ -132,9 +132,6 @@ class Order(models.Model):
         verbose_name='Статус'
     )
     address = models.TextField(verbose_name='Адрес')
-    cart_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Стоимость всех позиций')
-    delivery_fee = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Стоимость доставки')
-    service_fee = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Сервисный сбор')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Общая стоимость')
     comment = models.TextField(null=True, blank=True, verbose_name='Комментарий')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')

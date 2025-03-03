@@ -1,0 +1,55 @@
+from decimal import Decimal
+
+import numpy
+from constance import config as constance
+from matplotlib.path import Path
+
+from customers.models import DeliveryZone, OrderItem, Order, OrderStatuses
+from customers.serializers import CartItemSerializer
+
+
+def get_cart_data(cart_items, context):
+    serializer = CartItemSerializer(cart_items, many=True, context=context)
+    total_amount = Decimal(0)
+    for item in serializer.data:
+        total_amount = total_amount + item['menu_item']['price'] * item['quantity']
+    result_data = {
+        "cart_items": serializer.data,
+        "total_amount": total_amount
+    }
+    return result_data
+
+
+def check_point(vertices, point):
+    return Path(numpy.array(vertices)).contains_point(point)
+
+
+def is_in_delivery_zone(address):
+    for zone in DeliveryZone.objects.filter(is_active=True):
+        if zone.zone_json and check_point(
+            zone.zone_json["features"][0]["geometry"]["coordinates"][0],
+            [address.longitude, address.latitude]
+        ):
+            return True
+    return False
+
+
+def get_notification_text(order, total_amount, address, is_admin=False):
+    customer = order.customer
+    language = 'ru' if is_admin else customer.language
+    constance_text = {
+        "ru": (constance.BILL_INITIAL_RU, constance.BILL_TOTAL_RU, constance.BILL_FINAL_RU),
+        "uz": (constance.BILL_INITIAL_UZ, constance.BILL_TOTAL_UZ, constance.BILL_FINAL_UZ),
+    }
+    text = f"{constance_text[language][0]}:\n\n"
+    for item in OrderItem.objects.filter(order=order).order_by('-created_at'):
+        text = text + f" {item.quantity}x " + item.menu_item.name.translate() + "\n"
+    text = text + f"\n{constance_text[language][1]}: {total_amount}\n\n"
+    text = text + f"{address.value}\n\n"
+    if is_admin:
+        order_count = Order.objects.filter(customer=customer).exclude(status=OrderStatuses.CANCELLED).count()
+        text = text + f"Количество заказов: {order_count}\n\n"
+        text = text + f"https://yandex.kz/maps/ru/?ll={address.longitude}%2C{address.latitude}&z=13"
+    else:
+        text = text + f"{constance_text[language][2]}"
+    return text
