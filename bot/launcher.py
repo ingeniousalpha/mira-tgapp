@@ -10,14 +10,14 @@ from aiogram import Dispatcher, Bot, types
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.fsm.storage.base import BaseStorage, StorageKey
+from aiogram.fsm.storage.base import BaseStorage, StorageKey, StateType
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 from geopy import Nominatim
 from matplotlib.path import Path
 from sqlalchemy import Column, BigInteger, String, Integer
 from sqlalchemy import create_engine, sql, Connection
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, AsyncEngine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -33,26 +33,27 @@ class UserState(Base):
 
 
 class PostgreSQLStorage(BaseStorage):
-    def __init__(self, session):
+    def __init__(self, session: async_sessionmaker[AsyncSession], engine: AsyncEngine):
         self.session = session
+        self.engine = engine
 
-    async def set_state(self, key: StorageKey, state: str = None) -> None:
+    async def set_state(self, key: StorageKey, state: StateType = None) -> None:
         user_id = key.user_id
-        async with self.session.begin():
-            result = await self.session.execute(select(UserState).where(UserState.user_id == user_id))
+        async with self.session() as session:  # Создаем сессию
+            result = await session.execute(select(UserState).where(UserState.user_id == user_id))
             user_state = result.scalar_one_or_none()
 
             if user_state:
-                user_state.state = state
+                user_state.state = state.state if state else None
             else:
-                user_state = UserState(user_id=user_id, state=state)
-                self.session.add(user_state)
+                user_state = UserState(user_id=user_id, state=state.state if state else None)
+                session.add(user_state)
 
-            await self.session.commit()
+            await session.commit()
 
     async def get_state(self, key: StorageKey) -> Optional[str]:
         user_id = key.user_id
-        async with self.session() as session:
+        async with self.session() as session:  # Создаем сессию
             result = await session.execute(select(UserState).where(UserState.user_id == user_id))
             user_state = result.scalar_one_or_none()
 
@@ -62,7 +63,7 @@ class PostgreSQLStorage(BaseStorage):
 
     async def set_data(self, key: StorageKey, data: Dict[str, any]) -> None:
         user_id = key.user_id
-        async with self.session() as session:
+        async with self.session() as session:  # Создаем сессию
             result = await session.execute(select(UserState).where(UserState.user_id == user_id))
             user_state = result.scalar_one_or_none()
 
@@ -76,7 +77,7 @@ class PostgreSQLStorage(BaseStorage):
 
     async def get_data(self, key: StorageKey) -> Dict[str, any]:
         user_id = key.user_id
-        async with self.session() as session:
+        async with self.session() as session:  # Создаем сессию
             result = await session.execute(select(UserState).where(UserState.user_id == user_id))
             user_state = result.scalar_one_or_none()
 
@@ -86,7 +87,7 @@ class PostgreSQLStorage(BaseStorage):
 
     async def clear(self, key: StorageKey) -> None:
         user_id = key.user_id
-        async with self.session() as session:
+        async with self.session() as session:  # Создаем сессию
             result = await session.execute(select(UserState).where(UserState.user_id == user_id))
             user_state = result.scalar_one_or_none()
 
@@ -95,8 +96,8 @@ class PostgreSQLStorage(BaseStorage):
                 await session.commit()
 
     async def close(self) -> None:
-        # Закрываем соединение с базой данных
-        await self.session.close_all()
+        # Закрываем все соединения с базой данных
+        await self.engine.dispose()
 
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -131,7 +132,7 @@ engine = get_engine(__name__)
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 async_engine = create_async_engine(DATABASE_URL)
 async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
-storage = PostgreSQLStorage(async_session)
+storage = PostgreSQLStorage(async_session, async_engine)
 dp = Dispatcher(storage=storage)
 
 
