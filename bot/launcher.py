@@ -210,7 +210,6 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
     elif keyboard_type == KeyboardType.MENU:
         params= f"?customer_id={customer[0]}&language={language.lower()}"
         full_url = str(get_constance_value(session, f'WEB_APP_URL')) + params
-        print(full_url)
         return types.InlineKeyboardMarkup(
             inline_keyboard=[
                 [
@@ -282,7 +281,7 @@ async def command_start(message: types.Message, state: FSMContext):
             JOIN customers_customer cc ON co.customer_id = cc.id
             WHERE cc.telegram_user_id = {message.from_user.id}
         """)).fetchone()
-        if order_count == 0:
+        if order_count[0] == 0:
             image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
             await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
         await message.answer(
