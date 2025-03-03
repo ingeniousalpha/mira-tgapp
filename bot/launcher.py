@@ -94,6 +94,10 @@ class PostgreSQLStorage(BaseStorage):
                 await session.delete(user_state)
                 await session.commit()
 
+    async def close(self) -> None:
+        # Закрываем соединение с базой данных
+        await self.session.close_all()
+
 
 TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_PATH = '/webhook'
