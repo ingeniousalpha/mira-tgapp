@@ -15,7 +15,7 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 from geopy import Nominatim
 from matplotlib.path import Path
-from sqlalchemy import Column, BigInteger, String
+from sqlalchemy import Column, BigInteger, String, Integer
 from sqlalchemy import create_engine, sql, Connection
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,6 +27,7 @@ Base = declarative_base()
 
 class UserState(Base):
     __tablename__ = 'customers_state'
+    id = Column(Integer, primary_key=True)
     user_id = Column(BigInteger)
     state = Column(String)
 
