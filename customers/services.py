@@ -34,22 +34,24 @@ def is_in_delivery_zone(address):
     return False
 
 
-def get_notification_text(order, total_amount, address, is_admin=False):
-    customer = order.customer
+def get_notification_text(address, cart_data, order_comment, is_admin=False):
+    customer = address.customer
     language = 'ru' if is_admin else customer.language
     constance_text = {
         "ru": (constance.BILL_INITIAL_RU, constance.BILL_TOTAL_RU, constance.BILL_FINAL_RU),
         "uz": (constance.BILL_INITIAL_UZ, constance.BILL_TOTAL_UZ, constance.BILL_FINAL_UZ),
     }
     text = f"{constance_text[language][0]}:\n\n"
-    for item in OrderItem.objects.filter(order=order).order_by('-created_at'):
-        text = text + f" {item.quantity}x " + item.menu_item.name.translate() + "\n"
-    text = text + f"\n{constance_text[language][1]}: {total_amount}\n\n"
+    for item in cart_data['cart_items']:
+        text = text + f" {item['quantity']}x " + item['menu_item']['name'] + "\n"
+    text = text + f"\n{constance_text[language][1]}: {cart_data['total_amount']}\n\n"
     text = text + f"{address.value}\n\n"
     if is_admin:
+        text = text + f"https://yandex.ru/maps/?ll={address.longitude},{address.latitude}&pt={address.longitude},{address.latitude}&z=17\n\n"
         order_count = Order.objects.filter(customer=customer).exclude(status=OrderStatuses.CANCELLED).count()
-        text = text + f"Количество заказов: {order_count}\n\n"
-        text = text + f"https://yandex.kz/maps/ru/?ll={address.longitude}%2C{address.latitude}&z=13"
+        text = text + f"Номер телефона: {customer.phone_number}\n"
+        text = text + f"Количество заказов: {order_count}\n"
+        text = text + f"Комментарий: {order_comment}"
     else:
         text = text + f"{constance_text[language][2]}"
     return text

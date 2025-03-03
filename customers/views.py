@@ -99,10 +99,10 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
             cart_item.delete()
         send_telegram_message.delay(
             '-1002384142591',
-            get_notification_text(order, cart_data['total_amount'], address, True)
+            get_notification_text(address, cart_data, order.comment, True)
         )
         send_telegram_message.delay(
             order.customer.chat_id,
-            get_notification_text(order, cart_data['total_amount'], address)
+            get_notification_text(address, cart_data, order.comment)
         )
         return Response(data={}, status=status.HTTP_200_OK)
