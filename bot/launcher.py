@@ -344,11 +344,6 @@ async def process_set_phone(message: types.Message, state: FSMContext):
                 WHERE telegram_user_id = {message.from_user.id}
             """))
             session.commit()
-            await message.answer(
-                text=get_constance_value(session, f'MAIN_MESSAGE_{language}'),
-                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
-            )
-            await state.set_state(StepForm.main_section)
             order_count = session.execute(sql.text(f"""
                 SELECT COUNT(*)
                 FROM customers_order co
@@ -358,6 +353,11 @@ async def process_set_phone(message: types.Message, state: FSMContext):
             if order_count[0] == 0:
                 image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
                 await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
+            await message.answer(
+                text=get_constance_value(session, f'MAIN_MESSAGE_{language}'),
+                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
+            )
+            await state.set_state(StepForm.main_section)
         else:
             await message.answer(text=get_constance_value(session, f'PHONE_MESSAGE_{language}'))
 
