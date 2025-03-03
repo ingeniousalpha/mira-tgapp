@@ -18,9 +18,8 @@ from matplotlib.path import Path
 from sqlalchemy import Column, BigInteger, String, Integer
 from sqlalchemy import create_engine, sql, Connection
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, AsyncEngine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.future import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import declarative_base, Session
 
 Base = declarative_base()
 
