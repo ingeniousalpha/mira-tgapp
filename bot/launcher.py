@@ -10,17 +10,19 @@ from aiogram import Dispatcher, Bot, types
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 from geopy import Nominatim
 from matplotlib.path import Path
 from sqlalchemy import create_engine, sql, Connection
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session
+
+from bot.storage import PostgreSQLStorage
 
 TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_PATH = '/webhook'
-WEBHOOK_URL = 'https://miraapa.uz/webhook'  # Замените на ваш домен
+WEBHOOK_URL = 'https://miraapa.uz/webhook'
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_NAME = os.getenv("DB_NAME")
@@ -46,7 +48,11 @@ def get_engine(application_name: str):
 # Инициализация бота и диспетчера
 bot = Bot(token=TOKEN)
 engine = get_engine(__name__)
-storage = RedisStorage.from_url(f'redis://{os.getenv("REDIS_HOST")}:{os.getenv("REDIS_PORT")}/0')
+
+DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+async_engine = create_async_engine(DATABASE_URL)
+async_session = async_sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
+storage = PostgreSQLStorage(async_session)
 dp = Dispatcher(storage=storage)
 
 

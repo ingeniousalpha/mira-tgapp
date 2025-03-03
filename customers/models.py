@@ -167,3 +167,8 @@ class Notification(models.Model):
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
+
+
+class State(models.Model):
+    user_id = models.BigIntegerField()
+    state = models.TextField()
