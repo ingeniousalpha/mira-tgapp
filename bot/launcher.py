@@ -3,7 +3,7 @@ import os
 import pickle
 from base64 import b64decode
 from decimal import Decimal
-from typing import Union
+from typing import Union, Optional, Dict
 
 import numpy
 from aiogram import Dispatcher, Bot, types
@@ -49,6 +49,50 @@ class PostgreSQLStorage(BaseStorage):
                 self.session.add(user_state)
 
             await self.session.commit()
+
+    async def get_state(self, key: StorageKey) -> Optional[str]:
+        user_id = key.user_id
+        async with self.session() as session:
+            result = await session.execute(select(UserState).where(UserState.user_id == user_id))
+            user_state = result.scalar_one_or_none()
+
+            if user_state:
+                return user_state.state
+            return None
+
+    async def set_data(self, key: StorageKey, data: Dict[str, any]) -> None:
+        user_id = key.user_id
+        async with self.session() as session:
+            result = await session.execute(select(UserState).where(UserState.user_id == user_id))
+            user_state = result.scalar_one_or_none()
+
+            if user_state:
+                user_state.data = data
+            else:
+                user_state = UserState(user_id=user_id, data=data)
+                session.add(user_state)
+
+            await session.commit()
+
+    async def get_data(self, key: StorageKey) -> Dict[str, any]:
+        user_id = key.user_id
+        async with self.session() as session:
+            result = await session.execute(select(UserState).where(UserState.user_id == user_id))
+            user_state = result.scalar_one_or_none()
+
+            if user_state:
+                return user_state.data or {}
+            return {}
+
+    async def clear(self, key: StorageKey) -> None:
+        user_id = key.user_id
+        async with self.session() as session:
+            result = await session.execute(select(UserState).where(UserState.user_id == user_id))
+            user_state = result.scalar_one_or_none()
+
+            if user_state:
+                await session.delete(user_state)
+                await session.commit()
 
 
 TOKEN = os.getenv("BOT_TOKEN")
