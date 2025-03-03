@@ -4,18 +4,23 @@ import numpy
 from constance import config as constance
 from matplotlib.path import Path
 
-from customers.models import DeliveryZone, OrderItem, Order, OrderStatuses
+from customers.models import DeliveryZone, Order, OrderStatuses
 from customers.serializers import CartItemSerializer
 
 
-def get_cart_data(cart_items, context):
+def get_cart_data(customer_id, cart_items, context):
+    language = context['request'].language
     serializer = CartItemSerializer(cart_items, many=True, context=context)
     total_amount = Decimal(0)
     for item in serializer.data:
         total_amount = total_amount + item['menu_item']['price'] * item['quantity']
+    is_first_order = Order.objects.filter(customer_id=customer_id).count() == 0
+    extra_text = {'ru': constance.PRESENT_RU, 'uz': constance.PRESENT_UZ}
     result_data = {
         "cart_items": serializer.data,
-        "total_amount": total_amount
+        "total_amount": total_amount,
+        "is_first_order": is_first_order,
+        "extra_text": extra_text[language] if is_first_order else None
     }
     return result_data
 
@@ -51,7 +56,7 @@ def get_notification_text(address, cart_data, order_comment, is_admin=False):
         order_count = Order.objects.filter(customer=customer).exclude(status=OrderStatuses.CANCELLED).count()
         text = text + f"Номер телефона: {customer.phone_number}\n"
         text = text + f"Количество заказов: {order_count}\n"
-        text = text + f"Комментарий: {order_comment}"
+        text = text + f"Комментарий: {order_comment}\n"
     else:
         text = text + f"{constance_text[language][2]}"
     return text

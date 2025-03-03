@@ -39,7 +39,7 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         return Response(
-            data=get_cart_data(self.get_queryset(), context=self.get_serializer_context()),
+            data=get_cart_data(self.kwargs.get('pk'), self.get_queryset(), context=self.get_serializer_context()),
             status=status.HTTP_200_OK
         )
 
@@ -51,7 +51,7 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
             if cart_item.quantity == 0:
                 cart_item.delete()
             return Response(
-                data=get_cart_data(self.get_queryset(), context=self.get_serializer_context()),
+                data=get_cart_data(self.kwargs.get('pk'), self.get_queryset(), context=self.get_serializer_context()),
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -83,7 +83,7 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
                 {'data': None, 'error': {'code': 'not_in_delivery_zone', 'message': 'Адрес вне зоны доставки'}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        cart_data = get_cart_data(cart_items, context=self.get_serializer_context())
+        cart_data = get_cart_data(self.kwargs.get('pk'), cart_items, context=self.get_serializer_context())
         order = Order.objects.create(
             customer_id=self.kwargs.get('pk'),
             address=address.value,
@@ -99,10 +99,10 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
             cart_item.delete()
         send_telegram_message.delay(
             '-1002384142591',
-            get_notification_text(address, cart_data, order.comment, True)
+            get_notification_text(address, cart_data, order.comment or '-', True)
         )
         send_telegram_message.delay(
             order.customer.chat_id,
-            get_notification_text(address, cart_data, order.comment)
+            get_notification_text(address, cart_data, order.comment or '-')
         )
         return Response(data={}, status=status.HTTP_200_OK)
