@@ -171,4 +171,4 @@ class Notification(models.Model):
 
 class State(models.Model):
     user_id = models.BigIntegerField()
-    state = models.TextField()
+    state = models.TextField(null=True)
