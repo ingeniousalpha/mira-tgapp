@@ -275,16 +275,6 @@ async def command_start(message: types.Message, state: FSMContext):
             message_text = get_constance_value(session, f'MAIN_MESSAGE_{language}')
             keyboard_type = KeyboardType.MAIN
             next_step = StepForm.main_section
-        if keyboard_type == KeyboardType.MAIN:
-            order_count = session.execute(sql.text(f"""
-                SELECT COUNT(*)
-                FROM customers_order co
-                JOIN customers_customer cc ON co.customer_id = cc.id
-                WHERE cc.telegram_user_id = {message.from_user.id}
-            """)).fetchone()
-            if order_count[0] == 0:
-                image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
-                await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
         await message.answer(
             text=message_text, reply_markup=build_keyboard(session, message.from_user.id, keyboard_type, language)
         )
@@ -359,6 +349,15 @@ async def process_set_phone(message: types.Message, state: FSMContext):
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
             )
             await state.set_state(StepForm.main_section)
+            order_count = session.execute(sql.text(f"""
+                SELECT COUNT(*)
+                FROM customers_order co
+                JOIN customers_customer cc ON co.customer_id = cc.id
+                WHERE cc.telegram_user_id = {message.from_user.id}
+            """)).fetchone()
+            if order_count[0] == 0:
+                image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
+                await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
         else:
             await message.answer(text=get_constance_value(session, f'PHONE_MESSAGE_{language}'))
 
