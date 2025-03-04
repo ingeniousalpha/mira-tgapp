@@ -315,10 +315,6 @@ CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000'
-]
 CORS_ALLOW_HEADERS = [
     'access-control-allow-origin',
     'accept',
@@ -331,7 +327,8 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
-    'cookie'
+    'cookie',
+    'language',
 ]
 
 CSRF_TRUSTED_ORIGINS = ['https://miraapa.uz', 'https://www.miraapa.uz']
