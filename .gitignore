@@ -4,7 +4,10 @@ db.sqlite3
 
 logs/
 media/
-static/
+static/admin
+static/adminsortable2
+static/localized_fields
+static/rest_framework
 staticfiles/
 .env.dev
 .idea/
