@@ -252,6 +252,8 @@ CONSTANCE_CONFIG = {
     "BILL_TOTAL_UZ": ('Jami', 'Счет итого (UZ)'),
     "BILL_FINAL_RU": ('Благодарим за заказ!\nОператор свяжется с вами в ближайшее время.', 'Счет финальный текст (RU)'),
     "BILL_FINAL_UZ": ("Buyurtmangiz uchun rahmat!\nTez orada operator siz bilan bog'lanadi.", 'Счет финальный текст (UZ)'),
+    "NOT_WORKING_TIME_RU": ("К сожалению, в данное время мы не принимаем заказы.", 'Текст о нерабочем времени (RU)'),
+    "NOT_WORKING_TIME_UZ": ("Afsuski, biz hozircha buyurtmalarni qabul qilmayapmiz.", 'Текст о нерабочем времени (UZ)'),
 }
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ("Настройки WebView",(
@@ -308,6 +310,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
         "NOT_IN_DELIVERY_ZONE_UZ",
         "USE_MENU_BUTTON_RU",
         "USE_MENU_BUTTON_UZ",
+        "NOT_WORKING_TIME_RU",
+        "NOT_WORKING_TIME_UZ",
     ))
 ])
 CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True

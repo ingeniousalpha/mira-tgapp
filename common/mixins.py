@@ -18,7 +18,7 @@ class JSONRendererMixin:
             return response
 
         except Exception as e:
-            error = CustomError(str(e)).__dict__
+            error = CustomError('internal_server_error', str(e)).__dict__
             error['traceback'] = traceback.format_exc()
 
             if not settings.DEBUG:

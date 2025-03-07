@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 import numpy
@@ -60,3 +61,16 @@ def get_notification_text(address, cart_data, order_comment, is_admin=False):
     else:
         text = text + f"{constance_text[language][2]}"
     return text
+
+
+def is_working_time():
+    try:
+        start_time = datetime.strptime(constance.START_TIME, "%H:%M").time()
+        end_time = datetime.strptime(constance.END_TIME, "%H:%M").time()
+    except Exception:
+        raise ValueError("Неверный формат времени")
+    time_now = datetime.now().time()
+    if end_time > start_time:
+        return start_time <= time_now < end_time
+    else:
+        return time_now >= start_time or time_now < end_time

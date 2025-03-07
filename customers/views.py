@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from common.mixins import PublicJSONRendererMixin
 from customers.models import CartItem, Order, OrderItem, Address
 from customers.serializers import AddOrUpdateCartItemSerializer, OrderSerializer
-from customers.services import get_cart_data, is_in_delivery_zone, get_notification_text
+from customers.services import get_cart_data, is_in_delivery_zone, get_notification_text, is_working_time
 from customers.tasks import send_telegram_message
 
 
@@ -20,7 +20,7 @@ class InfoView(PublicJSONRendererMixin, GenericAPIView):
         address = self.get_queryset()
         if not address:
             return Response(
-                {'data': None, 'error': {'code': 'bad_request', 'message': 'Добавьте адрес'}},
+                {'data': None, 'error': {'code': 'address_is_required', 'message': 'Добавьте адрес'}},
                 status=status.HTTP_400_BAD_REQUEST
             )
         data = {
@@ -44,6 +44,12 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
         )
 
     def post(self, request, *args, **kwargs):
+        if not is_working_time():
+            error_text = constance.NOT_WORKING_TIME_UZ if request.language == 'uz' else constance.NOT_WORKING_TIME_RU
+            return Response(
+                {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         request.data['customer_id'] = self.kwargs.get('pk')
         serializer = AddOrUpdateCartItemSerializer(data=request.data)
         if serializer.is_valid():
@@ -70,6 +76,12 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
         return Order.objects.filter(customer_id=self.kwargs.get('pk'))
 
     def post(self, request, *args, **kwargs):
+        if not is_working_time():
+            error_text = constance.NOT_WORKING_TIME_UZ if request.language == 'uz' else constance.NOT_WORKING_TIME_RU
+            return Response(
+                {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         customer_id = self.kwargs.get('pk')
         cart_items = CartItem.objects.filter(customer_id=customer_id)
         if not cart_items.exists():
