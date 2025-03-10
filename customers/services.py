@@ -58,7 +58,7 @@ def get_notification_text(address, cart_data, order_id, order_comment, is_admin=
         text = text + f"Номер телефона: {customer.phone_number}\n"
         text = text + f"Количество заказов: {order_count}\n"
         text = text + f"Комментарий: {order_comment}\n"
-        text = text + f"Ссылка на заказ: https://miraapa.uz/admin/customers/order/{order_comment}/change/\n"
+        text = text + f"Ссылка на заказ: https://miraapa.uz/admin/customers/order/{order_id}/change/\n"
     else:
         text = text + f"{constance_text[language][2]}"
     return text
