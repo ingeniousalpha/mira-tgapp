@@ -56,7 +56,7 @@ def get_notification_text(address, cart_data, order_id, order_comment, is_admin=
     else:
         text = text + f"{address.value}\n\n"
     if is_admin:
-        if customer.for_pickup:
+        if not customer.for_pickup:
             text = text + f"https://yandex.ru/maps/?ll={address.longitude},{address.latitude}&pt={address.longitude},{address.latitude}&z=17\n\n"
         order_count = Order.objects.filter(customer=customer).exclude(status=OrderStatuses.CANCELLED).count()
         text = text + f"Номер телефона: {customer.phone_number}\n"
