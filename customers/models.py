@@ -19,6 +19,7 @@ class Customer(models.Model):
     phone_number = PhoneNumberField(null=True, blank=True, verbose_name='Номер телефона')
     name = models.TextField(null=True, blank=True, verbose_name="Имя")
     cashback = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='Cashback')
+    for_pickup = models.BooleanField(default=False, verbose_name='Самовывоз')
     language = models.CharField(
         max_length=5,
         choices=CustomerLanguages.choices,
@@ -135,6 +136,7 @@ class Order(models.Model):
     )
     address = models.TextField(verbose_name='Адрес')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Общая стоимость')
+    for_pickup = models.BooleanField(default=False, verbose_name='Самовывоз')
     comment = models.TextField(null=True, blank=True, verbose_name='Комментарий')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
 

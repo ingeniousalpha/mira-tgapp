@@ -256,6 +256,12 @@ CONSTANCE_CONFIG = {
     "BILL_FINAL_UZ": ("Buyurtmangiz uchun rahmat!\nTez orada operator siz bilan bog'lanadi.", 'Счет финальный текст (UZ)'),
     "NOT_WORKING_TIME_RU": ("К сожалению, в данное время мы не принимаем заказы.", 'Текст о нерабочем времени (RU)'),
     "NOT_WORKING_TIME_UZ": ("Afsuski, biz hozircha buyurtmalarni qabul qilmayapmiz.", 'Текст о нерабочем времени (UZ)'),
+    "DELIVERY_TYPE_RU": ("Доставка или самовывоз?", 'Доставка или самовывоз? (RU)'),
+    "DELIVERY_TYPE_UZ": ("Yetkazib berishmi yoki olib ketishmi?", 'Доставка или самовывоз? (UZ)'),
+    "DELIVERY_BUTTON_RU": ("Доставка", 'Кнопка "Доставка" (RU)'),
+    "DELIVERY_BUTTON_UZ": ("Yetkazib berish", 'Кнопка "Доставка" (UZ)'),
+    "PICKUP_BUTTON_RU": ("Самовывоз", 'Кнопка "Самовывоз" (RU)'),
+    "PICKUP_BUTTON_UZ": ("Olib ketish", 'Кнопка "Самовывоз" (UZ)'),
 }
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ("Кешбэк", (
@@ -319,6 +325,12 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
         "USE_MENU_BUTTON_UZ",
         "NOT_WORKING_TIME_RU",
         "NOT_WORKING_TIME_UZ",
+        "DELIVERY_TYPE_RU",
+        "DELIVERY_TYPE_UZ",
+        "DELIVERY_BUTTON_RU",
+        "DELIVERY_BUTTON_UZ",
+        "PICKUP_BUTTON_RU",
+        "PICKUP_BUTTON_UZ",
     ))
 ])
 CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True

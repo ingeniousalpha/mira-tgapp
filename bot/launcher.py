@@ -153,6 +153,7 @@ class StepForm(StatesGroup):
     main_section = State()
     menu_section = State()
     address_section = State()
+    delivery_type = State()
     settings_section = State()
 
 
@@ -163,6 +164,7 @@ class KeyboardType(enum.Enum):
     MENU = 4
     ADDRESSES = 5
     SETTINGS = 6
+    DELIVERY = 7
 
 
 def build_keyboard(session, telegram_user_id, keyboard_type,  language):
@@ -192,6 +194,12 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
             keyboard.append([types.KeyboardButton(text=address[0])])
         keyboard.append([types.KeyboardButton(text=get_constance_value(session, f'GET_BACK_BUTTON_{language}'))])
         return types.ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
+    elif keyboard_type == KeyboardType.DELIVERY:
+        button_text_list = [
+            get_constance_value(session, f'DELIVERY_BUTTON_{language}'),
+            get_constance_value(session, f'PICKUP_BUTTON_{language}'),
+            get_constance_value(session, f'GET_BACK_BUTTON_{language}'),
+        ]
     elif keyboard_type == KeyboardType.SETTINGS:
         button_text_list = [
             get_constance_value(session, f'EDIT_LANGUAGE_BUTTON_{language}'),
@@ -257,8 +265,8 @@ async def command_start(message: types.Message, state: FSMContext):
         if not customer:
             created = True
             session.execute(sql.text(f"""
-                INSERT INTO customers_customer (telegram_user_id, chat_id, phone_number, name, cashback, language, created_at)
-                VALUES ({message.from_user.id}, {message.chat.id}, NULL, NULL, 0, NULL, NOW()) ON CONFLICT (telegram_user_id) DO NOTHING
+                INSERT INTO customers_customer (telegram_user_id, chat_id, phone_number, name, cashback, for_pickup, language, created_at)
+                VALUES ({message.from_user.id}, {message.chat.id}, NULL, NULL, 0, false, NULL, NOW()) ON CONFLICT (telegram_user_id) DO NOTHING
             """))
             session.commit()
         if created or not customer[0]:
@@ -451,9 +459,9 @@ async def process_address_section(message: types.Message, state: FSMContext):
                     VALUES ({customer[0]}, {latitude}, {longitude}, '{address_str}', true, NOW())
                 """))
                 session.commit()
-            message_text = get_constance_value(session, f'MENU_MESSAGE_{language}')
-            keyboard_type = KeyboardType.MENU
-            next_step = StepForm.main_section
+            message_text = get_constance_value(session, f'DELIVERY_TYPE_{language}')
+            keyboard_type = KeyboardType.DELIVERY
+            next_step = StepForm.delivery_type
         elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
             message_text = get_constance_value(session, f'MAIN_MESSAGE_{language}')
             keyboard_type = KeyboardType.MAIN
@@ -482,20 +490,52 @@ async def process_address_section(message: types.Message, state: FSMContext):
                     """))
                     session.commit()
                     break
-            message_text = get_constance_value(session, f'MENU_MESSAGE_{language}')
-            keyboard_type = KeyboardType.MENU
-            next_step = StepForm.main_section
+            message_text = get_constance_value(session, f'DELIVERY_TYPE_{language}')
+            keyboard_type = KeyboardType.DELIVERY
+            next_step = StepForm.delivery_type
         await message.answer(
             text=message_text,
             reply_markup=build_keyboard(session, message.from_user.id, keyboard_type, language)
         )
-        if keyboard_type == KeyboardType.MENU:
+        await state.set_state(next_step)
+
+
+@dp.message(StepForm.delivery_type)
+async def process_delivery_type(message: types.Message, state: FSMContext):
+    with (Session(engine) as session):
+        language = get_customer_language(session, message.from_user.id)
+        for_pickup = ''
+        if message.text == get_constance_value(session, f'DELIVERY_BUTTON_{language}'):
+            for_pickup = 'false'
+        elif message.text == get_constance_value(session, f'PICKUP_BUTTON_{language}'):
+            for_pickup = 'true'
+        elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
+            pass
+        else:
+            return
+        if for_pickup:
+            session.execute(sql.text(f"""
+                UPDATE customers_customer
+                SET for_pickup = {for_pickup}
+                WHERE telegram_user_id = {message.from_user.id}
+            """))
+            session.commit()
+            await message.answer(
+                text=get_constance_value(session, f'MENU_MESSAGE_{language}'),
+                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MENU, language)
+            )
             await message.answer(
                 text=get_constance_value(session, f'USE_MENU_BUTTON_{language}'),
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
             )
-        if next_step:
-            await state.set_state(next_step)
+            await state.set_state(StepForm.main_section)
+        else:
+            await message.answer(
+                text=get_constance_value(session, f'ADDRESS_MESSAGE_{language}'),
+                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.ADDRESSES, language)
+            )
+            await state.set_state(StepForm.address_section)
+
 
 @dp.message(StepForm.settings_section)
 async def process_settings_section(message: types.Message, state: FSMContext):

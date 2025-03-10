@@ -49,13 +49,14 @@ class OrderItemInline(admin.StackedInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer', 'status', 'created_at', 'comment')
+    list_display = ('id', 'customer', 'status', 'for_pickup', 'created_at', 'comment')
     search_fields = ('customer__phone_number', 'comment')
-    list_filter = ('status',)
+    list_filter = ('status', 'for_pickup')
     sortable_by = ()
     fields = (
         'customer',
         'status',
+        'for_pickup',
         'created_at',
         'total_amount',
         'comment',
