@@ -328,7 +328,7 @@ async def process_set_language(message: types.Message, state: FSMContext):
         """))
         session.commit()
         await message.answer(
-            text=get_constance_value(session, f'MAIN_MESSAGE_{language.upper()}'),
+            text=get_constance_value(session, f'MAIN_MESSAGE_1_{language.upper()}'),
             reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
         )
         await state.set_state(StepForm.main_section)
@@ -463,7 +463,7 @@ async def process_address_section(message: types.Message, state: FSMContext):
             keyboard_type = KeyboardType.DELIVERY
             next_step = StepForm.delivery_type
         elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
-            message_text = get_constance_value(session, f'MAIN_MESSAGE_{language}')
+            message_text = get_constance_value(session, f'MAIN_MESSAGE_1_{language}')
             keyboard_type = KeyboardType.MAIN
             next_step = StepForm.main_section
         else:
@@ -550,7 +550,7 @@ async def process_settings_section(message: types.Message, state: FSMContext):
             keyboard_type = KeyboardType.PHONE
             next_step = StepForm.set_phone
         elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
-            message_text = get_constance_value(session, f'MAIN_MESSAGE_{language}')
+            message_text = get_constance_value(session, f'MAIN_MESSAGE_1_{language}')
             keyboard_type = KeyboardType.MAIN
             next_step = StepForm.main_section
         else:
