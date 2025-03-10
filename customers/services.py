@@ -16,7 +16,7 @@ def get_cart_data(customer_id, cart_items, context):
     for item in serializer.data:
         total_amount = total_amount + item['menu_item']['price'] * item['quantity']
     is_first_order = Order.objects.filter(customer_id=customer_id).count() == 0
-    extra_text = {'ru': constance.PRESENT_RU, 'uz': constance.PRESENT_UZ}
+    extra_text = {'ru': constance.PRESENT_CART_RU, 'uz': constance.PRESENT_CART_UZ}
     result_data = {
         "cart_items": serializer.data,
         "total_amount": total_amount,
@@ -40,7 +40,7 @@ def is_in_delivery_zone(address):
     return False
 
 
-def get_notification_text(address, cart_data, order_comment, is_admin=False):
+def get_notification_text(address, cart_data, order_id, order_comment, is_admin=False):
     customer = address.customer
     language = 'ru' if is_admin else customer.language
     constance_text = {
@@ -58,6 +58,7 @@ def get_notification_text(address, cart_data, order_comment, is_admin=False):
         text = text + f"Номер телефона: {customer.phone_number}\n"
         text = text + f"Количество заказов: {order_count}\n"
         text = text + f"Комментарий: {order_comment}\n"
+        text = text + f"Ссылка на заказ: https://miraapa.uz/admin/customers/order/{order_comment}/change/\n"
     else:
         text = text + f"{constance_text[language][2]}"
     return text

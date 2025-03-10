@@ -1,3 +1,4 @@
+import asyncio
 import enum
 import os
 import pickle
@@ -256,8 +257,8 @@ async def command_start(message: types.Message, state: FSMContext):
         if not customer:
             created = True
             session.execute(sql.text(f"""
-                INSERT INTO customers_customer (telegram_user_id, chat_id, phone_number, language, created_at)
-                VALUES ({message.from_user.id}, {message.chat.id}, NULL, NULL, NOW()) ON CONFLICT (telegram_user_id) DO NOTHING
+                INSERT INTO customers_customer (telegram_user_id, chat_id, phone_number, name, cashback, language, created_at)
+                VALUES ({message.from_user.id}, {message.chat.id}, NULL, NULL, 0, NULL, NOW()) ON CONFLICT (telegram_user_id) DO NOTHING
             """))
             session.commit()
         if created or not customer[0]:
@@ -340,10 +341,14 @@ async def process_set_phone(message: types.Message, state: FSMContext):
                 return
             session.execute(sql.text(f"""
                 UPDATE customers_customer
-                SET phone_number = '{message.contact.phone_number}'
+                SET phone_number = '{message.contact.phone_number}', name = '{message.contact.first_name}'
                 WHERE telegram_user_id = {message.from_user.id}
             """))
             session.commit()
+            await message.answer(
+                text=get_constance_value(session, f'MAIN_MESSAGE_{language}').format(message.contact.first_name),
+                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
+            )
             order_count = session.execute(sql.text(f"""
                 SELECT COUNT(*)
                 FROM customers_order co
@@ -353,10 +358,6 @@ async def process_set_phone(message: types.Message, state: FSMContext):
             if order_count[0] == 0:
                 image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
                 await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
-            await message.answer(
-                text=get_constance_value(session, f'MAIN_MESSAGE_{language}'),
-                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
-            )
             await state.set_state(StepForm.main_section)
         else:
             await message.answer(text=get_constance_value(session, f'PHONE_MESSAGE_{language}'))

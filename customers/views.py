@@ -111,10 +111,12 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
             cart_item.delete()
         send_telegram_message.delay(
             '-1002384142591',
-            get_notification_text(address, cart_data, order.comment or '-', True)
+            get_notification_text(address, cart_data, order.id, order.comment or '-', True)
         )
         send_telegram_message.delay(
             order.customer.chat_id,
-            get_notification_text(address, cart_data, order.comment or '-')
+            get_notification_text(address, cart_data, order.id, order.comment or '-')
         )
+        order.customer.cashback = order.customer.cashback + cart_data['total_amount'] * constance.CASHBACK_PERCENTAGE / 100
+        order.customer.save()
         return Response(data={}, status=status.HTTP_200_OK)

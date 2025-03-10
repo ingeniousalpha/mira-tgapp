@@ -17,6 +17,8 @@ class Customer(models.Model):
     telegram_user_id = models.BigIntegerField(unique=True, verbose_name='Telegram user ID')
     chat_id = models.BigIntegerField(verbose_name='Chat ID')
     phone_number = PhoneNumberField(null=True, blank=True, verbose_name='Номер телефона')
+    name = models.TextField(null=True, blank=True, verbose_name="Имя")
+    cashback = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='Cashback')
     language = models.CharField(
         max_length=5,
         choices=CustomerLanguages.choices,

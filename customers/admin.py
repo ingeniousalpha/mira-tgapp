@@ -26,12 +26,12 @@ class AddressInline(admin.StackedInline):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'telegram_user_id', 'phone_number', 'language', 'created_at')
-    list_display_links = ('id', 'telegram_user_id', 'phone_number')
-    search_fields = ('id', 'telegram_user_id', 'phone_number')
+    list_display = ('id', 'telegram_user_id', 'phone_number', 'name', 'language', 'created_at')
+    list_display_links = ('id', 'telegram_user_id', 'phone_number', 'name')
+    search_fields = ('id', 'telegram_user_id', 'phone_number', 'name')
     sortable_by = ()
-    fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'language', 'created_at')
-    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'created_at')
+    fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'cashback', 'language', 'created_at')
+    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'created_at')
     inlines = [AddressInline, CartItemInline]
 
     def has_add_permission(self, request):

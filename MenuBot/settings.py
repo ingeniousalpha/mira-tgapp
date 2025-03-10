@@ -202,6 +202,7 @@ CELERY_TASK_TRACK_STARTED = True
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
+    "CASHBACK_PERCENTAGE": (2, '% кешбэка'),
     "POPULAR_CATEGORY_RU": ("Популярное", 'Популярная категория (RU)'),
     "POPULAR_CATEGORY_UZ": ("Mashhur", 'Популярная категория (UZ)'),
     "START_TIME": ("08:00", 'Время открытия'),
@@ -222,6 +223,8 @@ CONSTANCE_CONFIG = {
     "PRESENT_IMAGE_URL": ('https://kazpravda.kz/media/uploads/publication2/694/39/69439-image.jpg', 'Ссылка на картинку подарка'),
     "PRESENT_RU": ('Текст о подарке', 'Текст о подарке (RU)'),
     "PRESENT_UZ": ('Текст о подарке', 'Текст о подарке (UZ)'),
+    "PRESENT_CART_RU": ('Текст о подарке в корзине', 'Текст о подарке в корзине (RU)'),
+    "PRESENT_CART_UZ": ('Текст о подарке в корзине', 'Текст о подарке в корзине (UZ)'),
     "MAIN_MESSAGE_RU": ('Для оформления заказа нажмите кнопку "🍴Меню"', 'Сообщение в меню (RU)'),
     "MAIN_MESSAGE_UZ": ('Buyurtma berish uchun "🍴Menyu" tugmasini bosing', 'Сообщение в меню (UZ)'),
     "MENU_BUTTON_RU": ('🍴Меню', 'Кнопка "Меню" (RU)'),
@@ -255,6 +258,9 @@ CONSTANCE_CONFIG = {
     "NOT_WORKING_TIME_UZ": ("Afsuski, biz hozircha buyurtmalarni qabul qilmayapmiz.", 'Текст о нерабочем времени (UZ)'),
 }
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
+    ("Кешбэк", (
+        "CASHBACK_PERCENTAGE",
+    )),
     ("Настройки WebView",(
         "POPULAR_CATEGORY_RU",
         "POPULAR_CATEGORY_UZ",
@@ -286,6 +292,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
         "PRESENT_IMAGE_URL",
         "PRESENT_RU",
         "PRESENT_UZ",
+        "PRESENT_CART_RU",
+        "PRESENT_CART_UZ",
         "MAIN_MESSAGE_RU",
         "MAIN_MESSAGE_UZ",
         "MENU_BUTTON_RU",
