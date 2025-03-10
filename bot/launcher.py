@@ -258,7 +258,7 @@ async def command_start(message: types.Message, state: FSMContext):
     with Session(engine) as session:
         created = False
         customer = session.execute(sql.text(f"""
-            SELECT language, phone_number
+            SELECT language, phone_number, name
             FROM customers_customer
             WHERE telegram_user_id = {message.from_user.id}
         """)).fetchone()
@@ -281,7 +281,7 @@ async def command_start(message: types.Message, state: FSMContext):
             next_step = StepForm.set_phone
         else:
             language = get_customer_language(session, message.from_user.id)
-            message_text = get_constance_value(session, f'MAIN_MESSAGE_{language}')
+            message_text = get_constance_value(session, f'MAIN_MESSAGE_{language}').format(customer[2])
             keyboard_type = KeyboardType.MAIN
             next_step = StepForm.main_section
         await message.answer(
