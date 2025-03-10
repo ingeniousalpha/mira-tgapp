@@ -1,5 +1,6 @@
 import json
 
+from constance import config as constance
 from django.db import models
 from django.db.models import TextChoices
 from localized_fields.fields import LocalizedTextField
@@ -139,6 +140,8 @@ class Order(models.Model):
     for_pickup = models.BooleanField(default=False, verbose_name='Самовывоз')
     comment = models.TextField(null=True, blank=True, verbose_name='Комментарий')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
+    used_cashback = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='Использованный cashback')
+    is_finished = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Заказ'
@@ -147,6 +150,14 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Заказ #{self.id}"
+
+    def save(self, *args, **kwargs):
+        super(Order, self).save(*args, **kwargs)
+        if self.status == OrderStatuses.DELIVERED and not self.is_finished:
+            self.customer.cashback = self.customer.cashback + self.total_amount * constance.CASHBACK_PERCENTAGE / 100
+            self.customer.save()
+            self.is_finished = True
+            self.save()
 
 
 class OrderItem(models.Model):

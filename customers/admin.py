@@ -31,7 +31,7 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('id', 'telegram_user_id', 'phone_number', 'name')
     sortable_by = ()
     fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'cashback', 'language', 'created_at')
-    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'created_at')
+    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'cashback', 'created_at')
     inlines = [AddressInline, CartItemInline]
 
     def has_add_permission(self, request):
@@ -60,20 +60,30 @@ class OrderAdmin(admin.ModelAdmin):
         'created_at',
         'total_amount',
         'comment',
-    )
-    readonly_fields = (
-        'customer',
-        'created_at',
-        'total_amount',
-        'comment',
+        'used_cashback',
     )
     inlines = [OrderItemInline]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            if obj.used_cashback:
+                return ('customer', 'created_at', 'total_amount', 'used_cashback', 'comment')
+            return ('customer', 'created_at', 'total_amount', 'comment')
+
 
     def has_add_permission(self, request):
         return False
 
     # def has_delete_permission(self, request, obj=None):
     #     return False
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if change:
+            for field in form.changed_data:
+                if field == 'used_cashback':
+                    obj.customer.cashback = obj.customer.cashback - obj.used_cashback
+                    obj.customer.save()
 
 
 @admin.register(Notification)
