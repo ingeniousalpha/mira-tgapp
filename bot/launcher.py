@@ -357,15 +357,17 @@ async def process_set_phone(message: types.Message, state: FSMContext):
                 text=get_constance_value(session, f'MAIN_MESSAGE_{language}').format(message.contact.first_name),
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
             )
-            order_count = session.execute(sql.text(f"""
-                SELECT COUNT(*)
-                FROM customers_order co
-                JOIN customers_customer cc ON co.customer_id = cc.id
-                WHERE cc.telegram_user_id = {message.from_user.id}
-            """)).fetchone()
-            if order_count[0] == 0:
-                image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
-                await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
+            present_on = get_constance_value(session, 'PRESENT_ON')
+            if present_on:
+                order_count = session.execute(sql.text(f"""
+                    SELECT COUNT(*)
+                    FROM customers_order co
+                    JOIN customers_customer cc ON co.customer_id = cc.id
+                    WHERE cc.telegram_user_id = {message.from_user.id}
+                """)).fetchone()
+                if order_count[0] == 0:
+                    image_url = get_constance_value(session, 'PRESENT_IMAGE_URL')
+                    await message.answer_photo(image_url, caption=get_constance_value(session, f'PRESENT_{language}'))
             await state.set_state(StepForm.main_section)
         else:
             await message.answer(text=get_constance_value(session, f'PHONE_MESSAGE_{language}'))
@@ -504,37 +506,36 @@ async def process_address_section(message: types.Message, state: FSMContext):
 async def process_delivery_type(message: types.Message, state: FSMContext):
     with (Session(engine) as session):
         language = get_customer_language(session, message.from_user.id)
-        for_pickup = ''
         if message.text == get_constance_value(session, f'DELIVERY_BUTTON_{language}'):
             for_pickup = 'false'
+            text = get_constance_value(session, f'DELIVERY_{language}')
         elif message.text == get_constance_value(session, f'PICKUP_BUTTON_{language}'):
             for_pickup = 'true'
+            text = get_constance_value(session, f'PICKUP_{language}')
         elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
-            pass
-        else:
-            return
-        if for_pickup:
-            session.execute(sql.text(f"""
-                UPDATE customers_customer
-                SET for_pickup = {for_pickup}
-                WHERE telegram_user_id = {message.from_user.id}
-            """))
-            session.commit()
-            await message.answer(
-                text=get_constance_value(session, f'MENU_MESSAGE_{language}'),
-                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MENU, language)
-            )
-            await message.answer(
-                text=get_constance_value(session, f'USE_MENU_BUTTON_{language}'),
-                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
-            )
-            await state.set_state(StepForm.main_section)
-        else:
             await message.answer(
                 text=get_constance_value(session, f'ADDRESS_MESSAGE_{language}'),
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.ADDRESSES, language)
             )
             await state.set_state(StepForm.address_section)
+            return
+        else:
+            return
+        session.execute(sql.text(f"""
+            UPDATE customers_customer
+            SET for_pickup = {for_pickup}
+            WHERE telegram_user_id = {message.from_user.id}
+        """))
+        session.commit()
+        await message.answer(
+            text=get_constance_value(session, f'MENU_MESSAGE_{language}'),
+            reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MENU, language)
+        )
+        await message.answer(
+            text=text,
+            reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
+        )
+        await state.set_state(StepForm.main_section)
 
 
 @dp.message(StepForm.settings_section)

@@ -140,7 +140,6 @@ class Order(models.Model):
     for_pickup = models.BooleanField(default=False, verbose_name='Самовывоз')
     comment = models.TextField(null=True, blank=True, verbose_name='Комментарий')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
-    used_cashback = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='Использованный cashback')
     is_finished = models.BooleanField(default=False)
 
     class Meta:

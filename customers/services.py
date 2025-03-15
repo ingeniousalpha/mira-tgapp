@@ -21,7 +21,7 @@ def get_cart_data(customer_id, cart_items, context):
         "cart_items": serializer.data,
         "total_amount": total_amount,
         "is_first_order": is_first_order,
-        "extra_text": extra_text[language] if is_first_order else None
+        "extra_text": extra_text[language] if is_first_order and constance.PRESENT_ON else None
     }
     return result_data
 

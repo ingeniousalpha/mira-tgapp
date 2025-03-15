@@ -60,15 +60,9 @@ class OrderAdmin(admin.ModelAdmin):
         'created_at',
         'total_amount',
         'comment',
-        'used_cashback',
     )
+    readonly_fields = ('customer', 'created_at', 'total_amount', 'comment')
     inlines = [OrderItemInline]
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            if obj.used_cashback:
-                return ('customer', 'created_at', 'total_amount', 'used_cashback', 'comment')
-            return ('customer', 'created_at', 'total_amount', 'comment')
 
 
     def has_add_permission(self, request):
@@ -76,14 +70,6 @@ class OrderAdmin(admin.ModelAdmin):
 
     # def has_delete_permission(self, request, obj=None):
     #     return False
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if change:
-            for field in form.changed_data:
-                if field == 'used_cashback':
-                    obj.customer.cashback = obj.customer.cashback - obj.used_cashback
-                    obj.customer.save()
 
 
 @admin.register(Notification)
