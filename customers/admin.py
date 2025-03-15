@@ -31,7 +31,7 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('id', 'telegram_user_id', 'phone_number', 'name')
     sortable_by = ()
     fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'cashback', 'language', 'created_at')
-    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'cashback', 'created_at')
+    readonly_fields = ('id', 'telegram_user_id', 'chat_id', 'phone_number', 'name', 'created_at')
     inlines = [AddressInline, CartItemInline]
 
     def has_add_permission(self, request):
