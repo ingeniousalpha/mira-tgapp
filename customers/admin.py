@@ -61,7 +61,7 @@ class OrderAdmin(admin.ModelAdmin):
         'total_amount',
         'comment',
     )
-    readonly_fields = ('customer', 'created_at', 'total_amount', 'comment')
+    readonly_fields = ('customer', 'for_pickup', 'created_at', 'total_amount', 'comment')
     inlines = [OrderItemInline]
 
 

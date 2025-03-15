@@ -4,7 +4,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, DestroyAPIView
 from rest_framework.response import Response
 
 from common.mixins import PublicJSONRendererMixin
-from customers.models import CartItem, Order, OrderItem, Address
+from customers.models import CartItem, Order, OrderItem, Address, Customer
 from customers.serializers import AddOrUpdateCartItemSerializer, OrderSerializer
 from customers.services import get_cart_data, is_in_delivery_zone, get_notification_text, is_working_time
 from customers.tasks import send_telegram_message
@@ -82,14 +82,14 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
                 {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        customer_id = self.kwargs.get('pk')
-        cart_items = CartItem.objects.filter(customer_id=customer_id)
+        customer = Customer.objects.filter(id=self.kwargs.get('pk')).first()
+        cart_items = CartItem.objects.filter(customer=customer)
         if not cart_items.exists():
             return Response(
                 {'data': None, 'error': {'code': 'cart_is_empty', 'message': 'Корзина пуста'}},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        address = Address.objects.filter(customer_id=customer_id, is_current=True).first()
+        address = Address.objects.filter(customer=customer, is_current=True).first()
         if not is_in_delivery_zone(address):
             Response(
                 {'data': None, 'error': {'code': 'not_in_delivery_zone', 'message': 'Адрес вне зоны доставки'}},
@@ -97,9 +97,10 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
             )
         cart_data = get_cart_data(self.kwargs.get('pk'), cart_items, context=self.get_serializer_context())
         order = Order.objects.create(
-            customer_id=self.kwargs.get('pk'),
+            customer=customer,
             address=address.value,
             total_amount=cart_data['total_amount'],
+            for_pickup=customer.for_pickup,
             comment=request.data.get('comment')
         )
         for cart_item in cart_items:
