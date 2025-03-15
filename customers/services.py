@@ -15,13 +15,13 @@ def get_cart_data(customer_id, cart_items, context):
     total_amount = Decimal(0)
     for item in serializer.data:
         total_amount = total_amount + item['menu_item']['price'] * item['quantity']
-    is_first_order = Order.objects.filter(customer_id=customer_id).count() == 0
+    is_first_order = constance.PRESENT_ON and Order.objects.filter(customer_id=customer_id).count() == 0
     extra_text = {'ru': constance.PRESENT_CART_RU, 'uz': constance.PRESENT_CART_UZ}
     result_data = {
         "cart_items": serializer.data,
         "total_amount": total_amount,
         "is_first_order": is_first_order,
-        "extra_text": extra_text[language] if is_first_order and constance.PRESENT_ON else None
+        "extra_text": extra_text[language] if is_first_order else None
     }
     return result_data
 
