@@ -3,10 +3,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from common.dashboard import dashboard_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/customers/", include("customers.urls")),
     path("api/menu/", include("menu.urls")),
+    path('dashboard/', dashboard_view),
 ]
 
 if settings.DEBUG:
