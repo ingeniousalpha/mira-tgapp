@@ -210,6 +210,7 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
                 web_app=types.WebAppInfo(url=full_url)
             )],
             [types.KeyboardButton(text=get_constance_value(session, f'GET_BACK_BUTTON_{language}'))],
+            [types.KeyboardButton(text=get_constance_value(session, f'GET_TO_MAIN_BUTTON_{language}'))],
         ]
         return types.ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
     elif keyboard_type == KeyboardType.SETTINGS:
@@ -560,7 +561,7 @@ async def process_web_view(message: types.Message, state: FSMContext):
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.DELIVERY, language)
             )
             await state.set_state(StepForm.delivery_type)
-        else:
+        elif message.text == get_constance_value(session, f'GET_TO_MAIN_BUTTON_{language}'):
             await message.answer(
                 text=get_constance_value(session, f'MAIN_MESSAGE_1_{language}'),
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
