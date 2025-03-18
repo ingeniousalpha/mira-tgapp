@@ -564,7 +564,7 @@ async def process_web_view(message: types.Message, state: FSMContext):
             return
 
 
-@dp.message(content_types=types.ContentType.WEB_APP_DATA)
+@dp.message(types.WebAppData)
 async def handle_web_app_data(message: types.Message, state: FSMContext):
     with (Session(engine) as session):
         language = get_customer_language(session, message.from_user.id)
