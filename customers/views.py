@@ -26,7 +26,9 @@ class InfoView(PublicJSONRendererMixin, GenericAPIView):
         return Address.objects.filter(customer_id=self.kwargs.get('pk'), is_current=True).first()
 
     def get(self, request, *args, **kwargs):
-        check_if_is_working_time(request.language)
+        response = check_if_is_working_time(request.language)
+        if response:
+            return response
         address = self.get_queryset()
         if not address:
             return Response(
@@ -54,7 +56,9 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
         )
 
     def post(self, request, *args, **kwargs):
-        check_if_is_working_time(request.language)
+        response = check_if_is_working_time(request.language)
+        if response:
+            return response
         request.data['customer_id'] = self.kwargs.get('pk')
         serializer = AddOrUpdateCartItemSerializer(data=request.data)
         if serializer.is_valid():
@@ -81,7 +85,9 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
         return Order.objects.filter(customer_id=self.kwargs.get('pk'))
 
     def post(self, request, *args, **kwargs):
-        check_if_is_working_time(request.language)
+        response = check_if_is_working_time(request.language)
+        if response:
+            return response
         customer = Customer.objects.filter(id=self.kwargs.get('pk')).first()
         cart_items = CartItem.objects.filter(customer=customer)
         if not cart_items.exists():
