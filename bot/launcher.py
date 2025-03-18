@@ -560,12 +560,11 @@ async def process_web_view(message: types.Message, state: FSMContext):
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.DELIVERY, language)
             )
             await state.set_state(StepForm.delivery_type)
-        else:
-            return
 
 
 @dp.message(types.WebAppData)
 async def handle_web_app_data(message: types.Message, state: FSMContext):
+    print(111)
     with (Session(engine) as session):
         language = get_customer_language(session, message.from_user.id)
         await message.answer(
