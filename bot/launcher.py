@@ -554,13 +554,7 @@ async def process_delivery_type(message: types.Message, state: FSMContext):
 async def process_web_view(message: types.Message, state: FSMContext):
     with (Session(engine) as session):
         language = get_customer_language(session, message.from_user.id)
-        if message.text == get_constance_value(session, f'WEB_APP_BUTTON_{language}'):
-            await message.answer(
-                text=get_constance_value(session, f'MAIN_MESSAGE_1_{language}'),
-                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
-            )
-            await state.set_state(StepForm.main_section)
-        elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
+        if message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
             await message.answer(
                 text=get_constance_value(session, f'ADDRESS_MESSAGE_{language}'),
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.DELIVERY, language)
@@ -568,6 +562,17 @@ async def process_web_view(message: types.Message, state: FSMContext):
             await state.set_state(StepForm.delivery_type)
         else:
             return
+
+
+@dp.message(content_types=types.ContentType.WEB_APP_DATA)
+async def handle_web_app_data(message: types.Message, state: FSMContext):
+    with (Session(engine) as session):
+        language = get_customer_language(session, message.from_user.id)
+        await message.answer(
+            text=get_constance_value(session, f'MAIN_MESSAGE_1_{language}'),
+            reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
+        )
+        await state.set_state(StepForm.main_section)
 
 
 @dp.message(StepForm.settings_section)
