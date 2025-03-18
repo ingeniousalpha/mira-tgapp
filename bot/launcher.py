@@ -1,4 +1,3 @@
-import asyncio
 import enum
 import os
 import pickle
@@ -154,6 +153,7 @@ class StepForm(StatesGroup):
     menu_section = State()
     address_section = State()
     delivery_type = State()
+    web_view = State()
     settings_section = State()
 
 
@@ -165,6 +165,7 @@ class KeyboardType(enum.Enum):
     ADDRESSES = 5
     SETTINGS = 6
     DELIVERY = 7
+    WEB_VIEW = 8
 
 
 def build_keyboard(session, telegram_user_id, keyboard_type,  language):
@@ -200,6 +201,17 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
             get_constance_value(session, f'PICKUP_BUTTON_{language}'),
             get_constance_value(session, f'GET_BACK_BUTTON_{language}'),
         ]
+    elif keyboard_type == KeyboardType.WEB_VIEW:
+        params = f"?customer_id={customer[0]}&language={language.lower()}"
+        full_url = str(get_constance_value(session, f'WEB_APP_URL')) + params
+        keyboard = [
+            [types.KeyboardButton(
+                text=get_constance_value(session, f'WEB_APP_BUTTON_{language}'),
+                web_app=types.WebAppInfo(url=full_url)
+            )],
+            [types.KeyboardButton(text=get_constance_value(session, f'GET_BACK_BUTTON_{language}'))],
+        ]
+        return types.ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
     elif keyboard_type == KeyboardType.SETTINGS:
         button_text_list = [
             get_constance_value(session, f'EDIT_LANGUAGE_BUTTON_{language}'),
@@ -533,9 +545,29 @@ async def process_delivery_type(message: types.Message, state: FSMContext):
         )
         await message.answer(
             text=text,
-            reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
+            reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.WEB_VIEW, language)
         )
-        await state.set_state(StepForm.main_section)
+        await state.set_state(StepForm.web_view)
+
+
+@dp.message(StepForm.web_view)
+async def process_web_view(message: types.Message, state: FSMContext):
+    with (Session(engine) as session):
+        language = get_customer_language(session, message.from_user.id)
+        if message.text == get_constance_value(session, f'WEB_APP_BUTTON_{language}'):
+            await message.answer(
+                text=get_constance_value(session, f'MAIN_MESSAGE_1_{language}'),
+                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MAIN, language)
+            )
+            await state.set_state(StepForm.main_section)
+        elif message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
+            await message.answer(
+                text=get_constance_value(session, f'ADDRESS_MESSAGE_{language}'),
+                reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.DELIVERY, language)
+            )
+            await state.set_state(StepForm.delivery_type)
+        else:
+            return
 
 
 @dp.message(StepForm.settings_section)
