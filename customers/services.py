@@ -74,7 +74,11 @@ def is_working_time():
         end_time = datetime.strptime(constance.END_TIME, "%H:%M").time()
     except Exception:
         raise ValueError("Неверный формат времени")
-    time_now = datetime.now().time()
+    datetime_now = datetime.now()
+    date_now = datetime_now.date()
+    time_now = datetime_now.time()
+    if date_now.today().isoweekday() == 7:
+        return False
     if end_time > start_time:
         return start_time <= time_now < end_time
     else:

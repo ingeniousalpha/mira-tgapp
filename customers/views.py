@@ -10,6 +10,15 @@ from customers.services import get_cart_data, is_in_delivery_zone, get_notificat
 from customers.tasks import send_telegram_message
 
 
+def check_if_is_working_time(language):
+    if not is_working_time():
+        error_text = constance.NOT_WORKING_TIME_UZ if language == 'uz' else constance.NOT_WORKING_TIME_RU
+        return Response(
+            {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
 class InfoView(PublicJSONRendererMixin, GenericAPIView):
     pagination_class = None
 
@@ -17,6 +26,7 @@ class InfoView(PublicJSONRendererMixin, GenericAPIView):
         return Address.objects.filter(customer_id=self.kwargs.get('pk'), is_current=True).first()
 
     def get(self, request, *args, **kwargs):
+        check_if_is_working_time(request.language)
         address = self.get_queryset()
         if not address:
             return Response(
@@ -44,12 +54,7 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
         )
 
     def post(self, request, *args, **kwargs):
-        if not is_working_time():
-            error_text = constance.NOT_WORKING_TIME_UZ if request.language == 'uz' else constance.NOT_WORKING_TIME_RU
-            return Response(
-                {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        check_if_is_working_time(request.language)
         request.data['customer_id'] = self.kwargs.get('pk')
         serializer = AddOrUpdateCartItemSerializer(data=request.data)
         if serializer.is_valid():
@@ -76,12 +81,7 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
         return Order.objects.filter(customer_id=self.kwargs.get('pk'))
 
     def post(self, request, *args, **kwargs):
-        if not is_working_time():
-            error_text = constance.NOT_WORKING_TIME_UZ if request.language == 'uz' else constance.NOT_WORKING_TIME_RU
-            return Response(
-                {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        check_if_is_working_time(request.language)
         customer = Customer.objects.filter(id=self.kwargs.get('pk')).first()
         cart_items = CartItem.objects.filter(customer=customer)
         if not cart_items.exists():
