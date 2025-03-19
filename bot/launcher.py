@@ -557,7 +557,7 @@ async def process_web_view(message: types.Message, state: FSMContext):
         language = get_customer_language(session, message.from_user.id)
         if message.text == get_constance_value(session, f'GET_BACK_BUTTON_{language}'):
             await message.answer(
-                text=get_constance_value(session, f'ADDRESS_MESSAGE_{language}'),
+                text=get_constance_value(session, f'DELIVERY_TYPE_{language}'),
                 reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.DELIVERY, language)
             )
             await state.set_state(StepForm.delivery_type)
