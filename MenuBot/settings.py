@@ -371,5 +371,3 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = ['https://miraapa.uz', 'https://www.miraapa.uz']
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = False
