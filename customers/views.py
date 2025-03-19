@@ -1,4 +1,5 @@
 from constance import config as constance
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListAPIView, DestroyAPIView
 from rest_framework.response import Response
@@ -55,6 +56,7 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
             status=status.HTTP_200_OK
         )
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         response = check_if_is_working_time(request.language)
         if response:
@@ -71,6 +73,7 @@ class CartView(PublicJSONRendererMixin, DestroyAPIView, GenericAPIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @csrf_exempt
     def delete(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         queryset.delete()
@@ -84,6 +87,7 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
     def get_queryset(self):
         return Order.objects.filter(customer_id=self.kwargs.get('pk'))
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         response = check_if_is_working_time(request.language)
         if response:
