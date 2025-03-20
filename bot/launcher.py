@@ -229,19 +229,6 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
             get_constance_value(session, f'SET_PHONE_{language}'),
         ]
         request_contact = True
-    elif keyboard_type == KeyboardType.MENU:
-        params= f"?customer_id={customer[0]}&language={language.lower()}"
-        full_url = str(get_constance_value(session, f'WEB_APP_URL')) + params
-        return types.InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    types.InlineKeyboardButton(
-                        text=get_constance_value(session, f'WEB_APP_BUTTON_{language}'),
-                        web_app=types.WebAppInfo(url=full_url)
-                    )
-                ]
-            ]
-        )
     else:
         button_text_list = [
             get_constance_value(session, f'MENU_BUTTON_{language}'),
@@ -540,10 +527,6 @@ async def process_delivery_type(message: types.Message, state: FSMContext):
             WHERE telegram_user_id = {message.from_user.id}
         """))
         session.commit()
-        await message.answer(
-            text=get_constance_value(session, f'MENU_MESSAGE_{language}'),
-            reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.MENU, language)
-        )
         await message.answer(
             text=text,
             reply_markup=build_keyboard(session, message.from_user.id, KeyboardType.WEB_VIEW, language)
