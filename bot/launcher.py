@@ -223,6 +223,7 @@ def build_keyboard(session, telegram_user_id, keyboard_type,  language):
         button_text_list = [
             get_constance_value(session, f'LANGUAGE_BUTTON_RU'),
             get_constance_value(session, f'LANGUAGE_BUTTON_UZ'),
+            get_constance_value(session, f'LANGUAGE_BUTTON_QP'),
         ]
     elif keyboard_type == KeyboardType.PHONE:
         button_text_list = [
@@ -297,6 +298,8 @@ async def process_set_initial_language(message: types.Message, state: FSMContext
             language = 'ru'
         elif message.text == get_constance_value(session, 'LANGUAGE_BUTTON_UZ'):
             language = 'uz'
+        elif message.text == get_constance_value(session, 'LANGUAGE_BUTTON_QP'):
+            language = 'qp'
         else:
             return
         session.execute(sql.text(f"""
@@ -319,6 +322,8 @@ async def process_set_language(message: types.Message, state: FSMContext):
             language = 'ru'
         elif message.text == get_constance_value(session, 'LANGUAGE_BUTTON_UZ'):
             language = 'uz'
+        elif message.text == get_constance_value(session, 'LANGUAGE_BUTTON_QP'):
+            language = 'qp'
         else:
             return
         session.execute(sql.text(f"""
