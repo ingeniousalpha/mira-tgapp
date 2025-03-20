@@ -4,7 +4,7 @@ from localized_fields.models import LocalizedModel
 
 
 class AbstractMenuModel(LocalizedModel):
-    name = LocalizedCharField(required=True, verbose_name="Наименование")
+    name = LocalizedCharField(required=['ru'], verbose_name="Наименование")
     is_hidden = models.BooleanField(default=False, verbose_name="Скрыть")
     priority = models.PositiveIntegerField(
         db_index=True,
@@ -36,7 +36,7 @@ class MenuItem(AbstractMenuModel):
         related_name='menu_items',
         verbose_name="Категория"
     )
-    description = LocalizedTextField(required=True, verbose_name="Описание")
+    description = LocalizedTextField(required=['ru'], verbose_name="Описание")
     image = models.ImageField(verbose_name="Картинка")
     price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Цена")
     is_cart_category = models.BooleanField(default=False, verbose_name="Товар у кассы")

@@ -12,6 +12,7 @@ from menu.models import MenuItem
 class CustomerLanguages(TextChoices):
     RUSSIAN = "ru", "Русский"
     UZBEK = "uz", "Узбекский"
+    KARAKALPAK = "qp", "Каракалпакский"
 
 
 class Customer(models.Model):
@@ -102,27 +103,33 @@ class OrderStatuses(TextChoices):
 readable_statuses = {
     OrderStatuses.ACCEPTED: {
         CustomerLanguages.RUSSIAN: "Принят",
-        CustomerLanguages.UZBEK: "Qabul qilingan"
+        CustomerLanguages.UZBEK: "Принят",
+        CustomerLanguages.KARAKALPAK: "Принят",
     },
     OrderStatuses.CONFIRMED: {
         CustomerLanguages.RUSSIAN: "Подтвержден",
-        CustomerLanguages.UZBEK: "Tasdiqlangan"
+        CustomerLanguages.UZBEK: "Подтвержден",
+        CustomerLanguages.KARAKALPAK: "Подтвержден",
     },
     OrderStatuses.PREPARING: {
         CustomerLanguages.RUSSIAN: "Готовится",
-        CustomerLanguages.UZBEK: "Tayyorgarlikda"
+        CustomerLanguages.UZBEK: "Готовится",
+        CustomerLanguages.KARAKALPAK: "Готовится",
     },
     OrderStatuses.IN_DELIVERY: {
         CustomerLanguages.RUSSIAN: "Доставляется",
-        CustomerLanguages.UZBEK: "Yetkazib berishda"
+        CustomerLanguages.UZBEK: "Доставляется",
+        CustomerLanguages.KARAKALPAK: "Доставляется",
     },
     OrderStatuses.DELIVERED: {
         CustomerLanguages.RUSSIAN: "Доставлен",
-        CustomerLanguages.UZBEK: "Yetkazib berildi"
+        CustomerLanguages.UZBEK: "Доставлен",
+        CustomerLanguages.KARAKALPAK: "Доставлен",
     },
     OrderStatuses.CANCELLED: {
         CustomerLanguages.RUSSIAN: "Отменен",
-        CustomerLanguages.UZBEK: "Bekor qilingan"
+        CustomerLanguages.UZBEK: "Отменен",
+        CustomerLanguages.KARAKALPAK: "Отменен",
     }
 }
 
@@ -173,7 +180,7 @@ class OrderItem(models.Model):
 
 
 class Notification(models.Model):
-    text = LocalizedTextField(required=True, verbose_name="Текст")
+    text = LocalizedTextField(required=['ru'], verbose_name="Текст")
 
     class Meta:
         verbose_name = 'Уведомление'
