@@ -103,33 +103,33 @@ class OrderStatuses(TextChoices):
 readable_statuses = {
     OrderStatuses.ACCEPTED: {
         CustomerLanguages.RUSSIAN: "Принят",
-        CustomerLanguages.UZBEK: "Принят",
-        CustomerLanguages.KARAKALPAK: "Принят",
+        CustomerLanguages.UZBEK: "Qabul qilindi",
+        CustomerLanguages.KARAKALPAK: "Qabıllandı",
     },
     OrderStatuses.CONFIRMED: {
         CustomerLanguages.RUSSIAN: "Подтвержден",
-        CustomerLanguages.UZBEK: "Подтвержден",
-        CustomerLanguages.KARAKALPAK: "Подтвержден",
+        CustomerLanguages.UZBEK: "Tasdiqlandi",
+        CustomerLanguages.KARAKALPAK: "Tastıyıqlandı",
     },
     OrderStatuses.PREPARING: {
         CustomerLanguages.RUSSIAN: "Готовится",
-        CustomerLanguages.UZBEK: "Готовится",
-        CustomerLanguages.KARAKALPAK: "Готовится",
+        CustomerLanguages.UZBEK: "Tayyorlanmoqda",
+        CustomerLanguages.KARAKALPAK: "Tayarlanıwda",
     },
     OrderStatuses.IN_DELIVERY: {
         CustomerLanguages.RUSSIAN: "Доставляется",
-        CustomerLanguages.UZBEK: "Доставляется",
-        CustomerLanguages.KARAKALPAK: "Доставляется",
+        CustomerLanguages.UZBEK: "Yetkazib berilmoqda",
+        CustomerLanguages.KARAKALPAK: " Jetkizip beriliwde",
     },
     OrderStatuses.DELIVERED: {
         CustomerLanguages.RUSSIAN: "Доставлен",
-        CustomerLanguages.UZBEK: "Доставлен",
-        CustomerLanguages.KARAKALPAK: "Доставлен",
+        CustomerLanguages.UZBEK: "Yetkazib berildi",
+        CustomerLanguages.KARAKALPAK: " Jetkizip berildi",
     },
     OrderStatuses.CANCELLED: {
         CustomerLanguages.RUSSIAN: "Отменен",
-        CustomerLanguages.UZBEK: "Отменен",
-        CustomerLanguages.KARAKALPAK: "Отменен",
+        CustomerLanguages.UZBEK: "Bekor qilindi",
+        CustomerLanguages.KARAKALPAK: "Biykar qılındı",
     }
 }
 
