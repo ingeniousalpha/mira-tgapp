@@ -11,7 +11,7 @@ class LanguageHeaderMiddleware(object):
 
     def process_request(self, request):
         language = request.META.get('HTTP_LANGUAGE')
-        if language and language not in ['ru', 'uz'] or not language:
+        if language and language not in ['ru', 'uz', 'qp'] or not language:
             language = 'ru'
         try:
             translation.activate(language)
