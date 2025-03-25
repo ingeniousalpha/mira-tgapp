@@ -2,7 +2,6 @@ import os
 
 import telegram
 from celery import shared_task
-from django.templatetags.i18n import language
 
 from customers.models import Customer
 
@@ -21,7 +20,12 @@ def send_telegram_message(chat_id, text):
 
 
 @shared_task
-def send_broadcast(text_ru, text_uz):
+def send_broadcast(text_ru, text_uz, text_qp):
     for customer in Customer.objects.all():
-        text = text_uz if customer.language == "uz" else text_ru
-        send_telegram_message.delay(customer.chat_id, text)
+        text = {
+            "ru": text_ru,
+            "uz": text_uz,
+            "qp": text_qp,
+        }
+        msg_text = text[customer.language] if text[customer.language] else text["ru"]
+        send_telegram_message.delay(customer.chat_id, msg_text)

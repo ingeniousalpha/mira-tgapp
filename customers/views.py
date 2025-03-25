@@ -12,9 +12,13 @@ from customers.tasks import send_telegram_message
 
 def check_if_is_working_time(language):
     if not is_working_time():
-        error_text = constance.NOT_WORKING_TIME_UZ if language == 'uz' else constance.NOT_WORKING_TIME_RU
+        error_text = {
+            "ru": constance.NOT_WORKING_TIME_RU,
+            "uz": constance.NOT_WORKING_TIME_UZ,
+            "qp": constance.NOT_WORKING_TIME_QP,
+        }
         return Response(
-            {'data': None, 'error': {'code': 'not_working_time', 'message': error_text}},
+            {'data': None, 'error': {'code': 'not_working_time', 'message': error_text[language]}},
             status=status.HTTP_400_BAD_REQUEST
         )
 

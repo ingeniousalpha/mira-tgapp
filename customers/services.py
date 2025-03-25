@@ -16,7 +16,11 @@ def get_cart_data(customer_id, cart_items, context):
     for item in serializer.data:
         total_amount = total_amount + item['menu_item']['price'] * item['quantity']
     is_first_order = constance.PRESENT_ON and Order.objects.filter(customer_id=customer_id).count() == 0
-    extra_text = {'ru': constance.PRESENT_CART_RU, 'uz': constance.PRESENT_CART_UZ}
+    extra_text = {
+        "ru": constance.PRESENT_CART_RU,
+        "uz": constance.PRESENT_CART_UZ,
+        "qp": constance.PRESENT_CART_QP,
+    }
     result_data = {
         "cart_items": serializer.data,
         "total_amount": total_amount,
@@ -46,6 +50,7 @@ def get_notification_text(address, cart_data, order_id, order_comment, is_admin=
     constance_text = {
         "ru": (constance.BILL_INITIAL_RU, constance.BILL_TOTAL_RU, constance.BILL_FINAL_RU, constance.PICKUP_BUTTON_RU),
         "uz": (constance.BILL_INITIAL_UZ, constance.BILL_TOTAL_UZ, constance.BILL_FINAL_UZ, constance.PICKUP_BUTTON_UZ),
+        "qp": (constance.BILL_INITIAL_QP, constance.BILL_TOTAL_QP, constance.BILL_FINAL_QP, constance.PICKUP_BUTTON_QP),
     }
     text = f"{constance_text[language][0]}:\n\n"
     for item in cart_data['cart_items']:

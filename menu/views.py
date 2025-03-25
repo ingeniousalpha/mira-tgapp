@@ -17,9 +17,14 @@ class MenuView(PublicJSONRendererMixin, ListAPIView):
         result_data = [category for category in serializer.data if category['items']]
         popular_items = MenuItem.objects.filter(is_hidden=False, is_popular=True)
         if popular_items.exists():
+            text = {
+                "ru": constance.POPULAR_CATEGORY_RU,
+                "uz": constance.POPULAR_CATEGORY_UZ,
+                "qp": constance.POPULAR_CATEGORY_QP,
+            }
             popular_category = {
                 "id": 0,
-                "name": constance.POPULAR_CATEGORY_UZ if request.language == 'uz' else constance.POPULAR_CATEGORY_RU,
+                "name": text[request.language],
                 "items": MenuItemSerializer(popular_items, many=True, context=self.get_serializer_context()).data
             }
             result_data.insert(0, popular_category)

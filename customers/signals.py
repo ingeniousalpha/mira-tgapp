@@ -8,4 +8,4 @@ from customers.tasks import send_broadcast
 @receiver(post_save, sender=Notification)
 def notification_post_save(sender, instance, created=False, **kwargs):
     if created:
-        send_broadcast.delay(instance.text.ru, instance.text.uz)
+        send_broadcast.delay(instance.text.ru, instance.text.uz, instance.text.qp)
