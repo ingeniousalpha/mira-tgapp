@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/customers/", include("customers.urls")),
     path("api/menu/", include("menu.urls")),
+    path("api/payments/", include("payments.urls")),
     path('dashboard/', dashboard_view),
 ]
 

@@ -49,19 +49,29 @@ class OrderItemInline(admin.StackedInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer', 'status', 'for_pickup', 'created_at', 'comment')
+    list_display = ('id', 'customer', 'status', 'payment_type', 'payment_status', 'for_pickup', 'created_at')
     search_fields = ('customer__phone_number', 'comment')
-    list_filter = ('status', 'for_pickup')
+    list_filter = ('status', 'payment_type', 'payment_status', 'for_pickup')
     sortable_by = ()
     fields = (
         'customer',
         'status',
+        'payment_type',
+        'payment_status',
         'for_pickup',
         'created_at',
         'total_amount',
         'comment',
     )
-    readonly_fields = ('customer', 'for_pickup', 'created_at', 'total_amount', 'comment')
+    readonly_fields = (
+        'customer',
+        'payment_type',
+        'payment_status',
+        'for_pickup',
+        'created_at',
+        'total_amount',
+        'comment',
+    )
     inlines = [OrderItemInline]
 
 

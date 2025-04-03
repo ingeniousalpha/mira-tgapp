@@ -55,6 +55,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     'customers.apps.CustomersConfig',
     'menu.apps.MenuConfig',
+    'payments.apps.PaymentsConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

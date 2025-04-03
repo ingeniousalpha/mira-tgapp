@@ -134,6 +134,17 @@ readable_statuses = {
 }
 
 
+class PaymentTypes(TextChoices):
+    CASH = "cash", "Наличными"
+    CARD = "card", "Картой"
+
+
+class PaymentStatuses(TextChoices):
+    WAITING = "waiting", "Ожидает подтверждения"
+    CONFIRMED = "confirmed", "Подтвержден"
+    REJECTED = "rejected", "Отклонен"
+
+
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders', verbose_name='Клиент')
     status = models.CharField(
@@ -144,6 +155,19 @@ class Order(models.Model):
     )
     address = models.TextField(verbose_name='Адрес')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Общая стоимость')
+    payment_type = models.CharField(
+        max_length=10,
+        choices=PaymentTypes.choices,
+        default=PaymentTypes.CASH,
+        verbose_name='Тип платежа'
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PaymentStatuses.choices,
+        null=True,
+        blank=True,
+        verbose_name='Статус платежа'
+    )
     for_pickup = models.BooleanField(default=False, verbose_name='Самовывоз')
     comment = models.TextField(null=True, blank=True, verbose_name='Комментарий')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')

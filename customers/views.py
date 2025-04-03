@@ -1,10 +1,11 @@
 from constance import config as constance
+from django.db import transaction
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListAPIView, DestroyAPIView
 from rest_framework.response import Response
 
 from common.mixins import PublicJSONRendererMixin
-from customers.models import CartItem, Order, OrderItem, Address, Customer
+from customers.models import CartItem, Order, OrderItem, Address, Customer, PaymentTypes
 from customers.serializers import AddOrUpdateCartItemSerializer, OrderSerializer
 from customers.services import get_cart_data, is_in_delivery_zone, get_notification_text, is_working_time
 from customers.tasks import send_telegram_message
@@ -106,26 +107,27 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         cart_data = get_cart_data(self.kwargs.get('pk'), cart_items, context=self.get_serializer_context())
-        order = Order.objects.create(
-            customer=customer,
-            address=address.value,
-            total_amount=cart_data['total_amount'],
-            for_pickup=customer.for_pickup,
-            comment=request.data.get('comment')
-        )
-        for cart_item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                menu_item=cart_item.menu_item,
-                quantity=cart_item.quantity
+        is_card_payment = request.data.get('is_card_payment', False) is True
+        with transaction.atomic():
+            order = Order.objects.create(
+                customer=customer,
+                address=address.value,
+                total_amount=cart_data['total_amount'],
+                payment_type = PaymentTypes.CARD if is_card_payment else PaymentTypes.CASH,
+                for_pickup=customer.for_pickup,
+                comment=request.data.get('comment')
             )
-            cart_item.delete()
-        send_telegram_message.delay(
-            '-1002384142591',
-            get_notification_text(address, cart_data, order.id, order.comment or '-', True)
-        )
-        send_telegram_message.delay(
-            order.customer.chat_id,
-            get_notification_text(address, cart_data, order.id, order.comment or '-')
-        )
+            OrderItem.objects.bulk_create(
+                [OrderItem(order=order, menu_item=item.menu_item, quantity=item.quantity) for item in cart_items]
+            )
+            if not is_card_payment:
+                cart_items.delete()
+                send_telegram_message.delay(
+                    '-1002384142591',
+                    get_notification_text(address, cart_data, order.id, order.comment or '-', True)
+                )
+                send_telegram_message.delay(
+                    order.customer.chat_id,
+                    get_notification_text(address, cart_data, order.id, order.comment or '-')
+                )
         return Response(data={}, status=status.HTTP_200_OK)
