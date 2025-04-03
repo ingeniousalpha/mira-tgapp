@@ -125,11 +125,12 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
             if is_card_payment:
                 click_url = "https://my.click.uz/services/pay"
                 response = {
-                    "payment_url": click_url + "?service_id={}&merchant_id={}&amount={}&transaction_param={}".format(
+                    "payment_url": click_url + "?service_id={}&merchant_id={}&amount={}&transaction_param={}&return_url={}".format(
                         os.getenv("CLICK_SERVICE_ID", ""),
                         os.getenv("CLICK_MERCHANT_ID", ""),
                         cart_data['total_amount'],
                         os.getenv("CLICK_MERCHANT_USER_ID", ""),
+                        "https://miraapa.uz",
                     )
                 }
             else:
