@@ -1,3 +1,5 @@
+import os
+
 from constance import config as constance
 from django.db import transaction
 from rest_framework import status
@@ -120,7 +122,17 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
             OrderItem.objects.bulk_create(
                 [OrderItem(order=order, menu_item=item.menu_item, quantity=item.quantity) for item in cart_items]
             )
-            if not is_card_payment:
+            if is_card_payment:
+                click_url = "https://my.click.uz/services/pay"
+                response = {
+                    "payment_url": click_url + "?service_id={}&merchant_id={}&amount={}&transaction_param={}".format(
+                        os.getenv("CLICK_SERVICE_ID", ""),
+                        os.getenv("CLICK_MERCHANT_ID", ""),
+                        cart_data['total_amount'],
+                        os.getenv("CLICK_MERCHANT_USER_ID", ""),
+                    )
+                }
+            else:
                 cart_items.delete()
                 send_telegram_message.delay(
                     '-1002384142591',
@@ -130,4 +142,5 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
                     order.customer.chat_id,
                     get_notification_text(address, cart_data, order.id, order.comment or '-')
                 )
-        return Response(data={}, status=status.HTTP_200_OK)
+                response = {}
+            return Response(data=response, status=status.HTTP_200_OK)

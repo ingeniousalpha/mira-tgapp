@@ -581,24 +581,25 @@ async def process_settings_section(message: types.Message, state: FSMContext):
         await state.set_state(next_step)
 
 
-# Функция для настройки вебхука при запуске
 async def on_startup(app: web.Application):
     await bot.set_webhook(WEBHOOK_URL)
 
-# Создание aiohttp приложения
+
 app = web.Application()
-
-# Регистрация обработчика вебхука
-webhook_requests_handler = SimpleRequestHandler(
-    dispatcher=dp,
-    bot=bot,
-)
+webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
 webhook_requests_handler.register(app, path=WEBHOOK_PATH)
-
-# Настройка приложения
 setup_application(app, dp, bot=bot)
 
-# Запуск приложения
+
 if __name__ == '__main__':
-    # Указываем порт, на котором будет работать бот (HTTP)
     web.run_app(app, host='0.0.0.0', port=8081)
+
+
+# For local tests
+
+# async def main():
+#     await dp.start_polling(bot)
+#
+#
+# if __name__ == "main":
+#     asyncio.run(main())

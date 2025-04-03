@@ -20,7 +20,7 @@ def order_load(order_id):
 
 
 def click_secret_key():
-    return os.getenv("CLICK_SECRET_KEY")
+    return os.getenv("CLICK_SECRET_KEY", "")
 
 
 def click_webhook_errors(request):
