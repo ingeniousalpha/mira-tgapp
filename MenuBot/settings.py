@@ -100,19 +100,16 @@ REST_FRAMEWORK = {
 APPEND_SLASH = False
 
 
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
 REDIS_DB_FOR_CACHE = os.getenv("REDIS_DB_FOR_CACHE")
-REDIS_AS_CACHE_URL = "redis://:{password}@{host}:{port}/{db_index}".format(
-    password=REDIS_PASSWORD,
+REDIS_AS_CACHE_URL = "redis://{host}:{port}/{db_index}".format(
     host=REDIS_HOST,
     port=REDIS_PORT,
     db_index=REDIS_DB_FOR_CACHE,
 )
 REDIS_DB_FOR_CELERY = os.getenv("REDIS_DB_FOR_CELERY", "0")
-REDIS_AS_BROKER_URL = "redis://:{password}@{host}:{port}/{db_index}".format(
-    password=REDIS_PASSWORD,
+REDIS_AS_BROKER_URL = "redis://{host}:{port}/{db_index}".format(
     host=REDIS_HOST,
     port=REDIS_PORT,
     db_index=REDIS_DB_FOR_CELERY,

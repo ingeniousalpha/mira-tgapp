@@ -31,10 +31,10 @@ services:
   menu-redis:
     container_name: menu-redis
     restart: unless-stopped
-    image: redis:alpine
+    image: redis
     ports:
-      - "127.0.0.1:6379:6379"
-    command: redis-server --requirepass $${REDIS_PASSWORD} --bind 0.0.0.0 --protected-mode yes
+      - "6379:6379"
+    command: redis-server --bind 0.0.0.0 --appendonly yes --replica-read-only no
     volumes:
       - menu-redis_data:/data
     env_file:
