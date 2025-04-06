@@ -481,22 +481,26 @@ async def process_address_section(message: types.Message, state: FSMContext):
                 WHERE cc.telegram_user_id = {message.from_user.id}
                 ORDER BY ca.created_at DESC
             """)).fetchall()
-            if addresses:
-                session.execute(sql.text(f"""
-                    UPDATE customers_address
-                    SET is_current = false
-                    WHERE customer_id = {customer[0]}
-                """))
-                session.commit()
+
+            address_id = None
             for address in addresses:
                 if message.text == address[1]:
-                    session.execute(sql.text(f"""
-                        UPDATE customers_address
-                        SET is_current = true
-                        WHERE id = {address[0]}
-                    """))
-                    session.commit()
+                    address_id = address[0]
                     break
+            if not address_id:
+                return
+            session.execute(sql.text(f"""
+                UPDATE customers_address
+                SET is_current = false
+                WHERE customer_id = {customer[0]}
+            """))
+            session.commit()
+            session.execute(sql.text(f"""
+                UPDATE customers_address
+                SET is_current = true
+                WHERE id = {address_id}
+            """))
+            session.commit()
             message_text = get_constance_value(session, f'DELIVERY_TYPE_{language}')
             keyboard_type = KeyboardType.DELIVERY
             next_step = StepForm.delivery_type
