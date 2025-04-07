@@ -4,7 +4,7 @@ import os
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from customers.models import Order, PaymentStatuses
+from customers.models import Order, PaymentStatuses, CartItem
 
 
 def isset(data, columns):
@@ -161,4 +161,6 @@ def complete(request):
     result['merchant_confirm_id'] = request.POST.get('merchant_prepare_id', None)
     print(f"FINAL RESULT = {result}")
     print("CLICK COMPLETE METHOD FINISHED")
+    cart_items = CartItem.objects.filter(customer=order.customer)
+    cart_items.delete()
     return JsonResponse(result)
