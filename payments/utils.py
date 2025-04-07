@@ -121,6 +121,7 @@ def click_webhook_errors(request):
 def prepare(request):
     print("CLICK PREPARE METHOD STARTED")
     print(request.POST)
+    print(request.headers)
     print("GO TO click_webhook_errors()")
     result = click_webhook_errors(request)
     print(f"INITIAL RESULT: {result}")
@@ -138,7 +139,6 @@ def prepare(request):
     print(f"FINAL RESULT = {result}")
     print("CLICK PREPARE METHOD FINISHED")
     return JsonResponse(result)
-    return JsonResponse({})
 
 
 def complete(request):
