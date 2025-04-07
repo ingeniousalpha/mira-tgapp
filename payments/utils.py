@@ -15,7 +15,6 @@ def isset(data, columns):
 
 
 def order_load(order_id):
-    print(order_id)
     order = get_object_or_404(Order, id=int(order_id))
     return order
 
@@ -25,7 +24,6 @@ def click_secret_key():
 
 
 def click_webhook_errors(request):
-    print("-" * 50 + "1")
     click_trans_id = request.POST.get('click_trans_id', None)
     service_id = request.POST.get('service_id', None)
     order_id = request.POST.get('merchant_trans_id', None)
@@ -35,7 +33,6 @@ def click_webhook_errors(request):
     sign_time = request.POST.get('sign_time', None)
     sign_string = request.POST.get('sign_string', None)
     merchant_prepare_id = request.POST.get('merchant_prepare_id', None) if action is not None and action == '1' else ''
-    print("-" * 50 + "2")
 
     if (
         isset(
@@ -59,7 +56,6 @@ def click_webhook_errors(request):
             'error_note': 'Error in request from click'
         }
 
-    print("-" * 50 + "3")
     sign_check_string = '{}{}{}{}{}{}{}{}'.format(
         click_trans_id, service_id, click_secret_key(), order_id, merchant_prepare_id, amount, action, sign_time
     )
@@ -71,14 +67,12 @@ def click_webhook_errors(request):
             'error_note': 'Sign check failed'
         }
 
-    print("-" * 50 + "4")
     if action not in ['0', '1']:
         return {
             'error': '-3',
             'error_note': 'Action not found'
         }
 
-    print("-" * 50 + "5")
     order = order_load(order_id)
     if not order:
         return {
@@ -86,7 +80,6 @@ def click_webhook_errors(request):
             'error_note': 'Order does not exist'
         }
 
-    print("-" * 50 + "6")
     if abs(float(amount) - float(order.total_amount) > 0.01):
         return {
             'error': '-2',
@@ -106,7 +99,6 @@ def click_webhook_errors(request):
                 'error_note': 'Transaction not found'
             }
 
-    print("-" * 50 + "7")
     if order.payment_status == PaymentStatuses.REJECTED or int(error) < 0:
         return {
             'error': '-9',
@@ -120,16 +112,9 @@ def click_webhook_errors(request):
 
 
 def prepare(request):
-    print("CLICK PREPARE METHOD STARTED")
-    print(request.POST)
-    print(request.headers)
-    print("GO TO click_webhook_errors()")
     result = click_webhook_errors(request)
-    print(f"INITIAL RESULT: {result}")
     order_id = request.POST.get('merchant_trans_id', None)
-    print(f"ORDER_ID = {order_id}")
     order = order_load(order_id)
-    print(f"ORDER: {order}")
     if result['error'] == '0':
         order.payment_status = PaymentStatuses.WAITING
         order.save(update_fields=['payment_status'])
@@ -137,17 +122,12 @@ def prepare(request):
     result['merchant_trans_id'] = request.POST.get('merchant_trans_id', None)
     result['merchant_prepare_id'] = request.POST.get('merchant_trans_id', None)
     result['merchant_confirm_id'] = request.POST.get('merchant_trans_id', None)
-    print(f"FINAL RESULT = {result}")
-    print("CLICK PREPARE METHOD FINISHED")
     return JsonResponse(result)
 
 
 def complete(request):
-    print("CLICK COMPLETE METHOD STARTED")
     result = click_webhook_errors(request)
-    print(f"INITIAL RESULT: {result}")
     order_id = request.POST.get('merchant_trans_id', None)
-    print(f"ORDER_ID = {order_id}")
     order = order_load(order_id)
     if request.POST.get('error', None) is not None and int(request.POST.get('error', None)) < 0:
         order.payment_status = PaymentStatuses.REJECTED
@@ -159,8 +139,6 @@ def complete(request):
     result['merchant_trans_id'] = request.POST.get('merchant_trans_id', None)
     result['merchant_prepare_id'] = request.POST.get('merchant_prepare_id', None)
     result['merchant_confirm_id'] = request.POST.get('merchant_prepare_id', None)
-    print(f"FINAL RESULT = {result}")
-    print("CLICK COMPLETE METHOD FINISHED")
     cart_items = CartItem.objects.filter(customer=order.customer)
     cart_items.delete()
     return JsonResponse(result)
