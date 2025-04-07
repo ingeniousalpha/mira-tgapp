@@ -130,7 +130,7 @@ def prepare(request):
     # print(f"FINAL RESULT = {result}")
     # print("CLICK PREPARE METHOD FINISHED")
     # return JsonResponse(result)
-    return JsonResponse(request)
+    return JsonResponse({})
 
 
 def complete(request):
