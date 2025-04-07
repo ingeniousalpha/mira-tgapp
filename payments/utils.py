@@ -15,6 +15,7 @@ def isset(data, columns):
 
 
 def order_load(order_id):
+    print(order_id)
     order = get_object_or_404(Order, id=int(order_id))
     return order
 
