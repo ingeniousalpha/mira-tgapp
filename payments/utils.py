@@ -113,22 +113,24 @@ def click_webhook_errors(request):
 
 def prepare(request):
     print("CLICK PREPARE METHOD STARTED")
-    result = click_webhook_errors(request)
-    print(f"INITIAL RESULT: {result}")
-    order_id = request.POST.get('merchant_trans_id', None)
-    print(f"ORDER_ID = {order_id}")
-    order = order_load(order_id)
-    print(f"ORDER: {order}")
-    if result['error'] == '0':
-        order.payment_status = PaymentStatuses.WAITING
-        order.save(update_fields=['payment_status'])
-    result['click_trans_id'] = request.POST.get('click_trans_id', None)
-    result['merchant_trans_id'] = request.POST.get('merchant_trans_id', None)
-    result['merchant_prepare_id'] = request.POST.get('merchant_trans_id', None)
-    result['merchant_confirm_id'] = request.POST.get('merchant_trans_id', None)
-    print(f"FINAL RESULT = {result}")
-    print("CLICK PREPARE METHOD FINISHED")
-    return JsonResponse(result)
+    print(request)
+    # result = click_webhook_errors(request)
+    # print(f"INITIAL RESULT: {result}")
+    # order_id = request.POST.get('merchant_trans_id', None)
+    # print(f"ORDER_ID = {order_id}")
+    # order = order_load(order_id)
+    # print(f"ORDER: {order}")
+    # if result['error'] == '0':
+    #     order.payment_status = PaymentStatuses.WAITING
+    #     order.save(update_fields=['payment_status'])
+    # result['click_trans_id'] = request.POST.get('click_trans_id', None)
+    # result['merchant_trans_id'] = request.POST.get('merchant_trans_id', None)
+    # result['merchant_prepare_id'] = request.POST.get('merchant_trans_id', None)
+    # result['merchant_confirm_id'] = request.POST.get('merchant_trans_id', None)
+    # print(f"FINAL RESULT = {result}")
+    # print("CLICK PREPARE METHOD FINISHED")
+    # return JsonResponse(result)
+    return JsonResponse(request)
 
 
 def complete(request):
