@@ -4,7 +4,9 @@ import os
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from customers.models import Order, PaymentStatuses, CartItem
+from customers.models import Order, PaymentStatuses, CartItem, Address
+from customers.services import get_notification_text, get_cart_data
+from customers.tasks import send_telegram_message
 
 
 def isset(data, columns):
@@ -129,16 +131,30 @@ def complete(request):
     result = click_webhook_errors(request)
     order_id = request.POST.get('merchant_trans_id', None)
     order = order_load(order_id)
+
     if request.POST.get('error', None) is not None and int(request.POST.get('error', None)) < 0:
         order.payment_status = PaymentStatuses.REJECTED
         order.save(update_fields=['payment_status'])
+
     if result['error'] == '0':
         order.payment_status = PaymentStatuses.CONFIRMED
         order.save(update_fields=['payment_status'])
+
+        cart_items = CartItem.objects.filter(customer=order.customer)
+        address = Address.objects.filter(customer=order.customer, value=order.address).first()
+        setattr(request, 'language', order.customer.language)
+        cart_data = get_cart_data(order.customer.id, cart_items, context={'request': request})
+        send_telegram_message.delay(
+            '-1002384142591',
+            get_notification_text(address, cart_data, order.id, order.comment or '-', True)
+        )
+        send_telegram_message.delay(
+            order.customer.chat_id,
+            get_notification_text(address, cart_data, order.id, order.comment or '-')
+        )
+        cart_items.delete()
     result['click_trans_id'] = request.POST.get('click_trans_id', None)
     result['merchant_trans_id'] = request.POST.get('merchant_trans_id', None)
     result['merchant_prepare_id'] = request.POST.get('merchant_prepare_id', None)
     result['merchant_confirm_id'] = request.POST.get('merchant_prepare_id', None)
-    cart_items = CartItem.objects.filter(customer=order.customer)
-    cart_items.delete()
     return JsonResponse(result)

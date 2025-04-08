@@ -130,7 +130,7 @@ class OrderView(PublicJSONRendererMixin, ListAPIView, GenericAPIView):
                         os.getenv("CLICK_MERCHANT_ID", ""),
                         cart_data['total_amount'],
                         order.id,
-                        "https://miraapa.uz",
+                        "https://t.me/AsxanaMiraApa_bot",
                     )
                 }
             else:
